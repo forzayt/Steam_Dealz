@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Fetch Steam deal listings through a server function and cache each region/page briefly, because Steam does not provide a guaranteed public bulk-deals API.
