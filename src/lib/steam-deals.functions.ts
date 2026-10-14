@@ -157,11 +157,17 @@ async function getSteamPage(country: SteamCountry, start: number) {
 const inputSchema = z.object({
   country: z.enum(STEAM_COUNTRIES),
   start: z.number().int().min(0).max(10_000).multipleOf(PAGE_SIZE),
+  refresh: z.boolean().optional(),
 });
 
 export const getSteamDeals = createServerFn({ method: "GET" })
   .inputValidator((input) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<SteamDealsResult> => {
+    if (data.refresh) {
+      for (const key of pageCache.keys()) {
+        if (key.startsWith(`${data.country}:`)) pageCache.delete(key);
+      }
+    }
     const starts = data.start === 0 ? [0, PAGE_SIZE, PAGE_SIZE * 2] : [data.start];
     const pages = await Promise.all(starts.map((start) => getSteamPage(data.country, start)));
     const uniqueDeals = new Map<string, SteamDeal>();
