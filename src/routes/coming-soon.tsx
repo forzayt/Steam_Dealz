@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, CalendarDays, LoaderCircle, Search } from "lucide-react";
+import { AlertCircle, CalendarDays, LoaderCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
-import { DealCard, DealCardSkeleton, EmptyState, REGION_NAMES, useDebouncedTerm, useSteamDeals } from "@/components/spark/deals-shared";
+import { DealCard, DealCardSkeleton, EmptyState, REGION_NAMES, useSteamDeals } from "@/components/spark/deals-shared";
 import { STEAM_COUNTRIES, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
 
 function groupLabel(date?: string): string {
@@ -29,19 +29,13 @@ export const Route = createFileRoute("/coming-soon")({
 });
 
 function ComingSoonPage() {
-  const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/coming-soon" });
   const [country, setCountry] = useState<SteamCountry>("IN");
-  const { trimmedQuery, activeTerm, isSearching } = useDebouncedTerm(q);
-  const { games, totalCount, loading, loadingMore, error, refresh, loadMore, hasMore } = useSteamDeals(
+  const { games, loading, loadingMore, error, refresh, loadMore, hasMore } = useSteamDeals(
     country,
-    activeTerm,
+    "",
     "comingsoon",
   );
-
-  const updateSearch = (value: string) => {
-    void navigate({ search: (prev) => ({ ...prev, q: value }), replace: true });
-  };
 
   const groups = useMemo(() => {
     const map = new Map<string, SteamDeal[]>();
@@ -67,7 +61,6 @@ function ComingSoonPage() {
     }
     void navigate({
       to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog" | "/top-sellers" | "/coming-soon",
-      search: { q },
     });
   };
 
@@ -93,35 +86,6 @@ function ComingSoonPage() {
         </div>
       </div>
 
-      <div className="page-search-wrapper">
-        <span className="page-search-icon" aria-hidden="true">
-          <Search size={17} />
-        </span>
-        <input
-          type="search"
-          className="page-search-input"
-          placeholder="Search upcoming games — try “hollow knight”"
-          value={q}
-          onChange={(e) => updateSearch(e.currentTarget.value)}
-          aria-label="Search upcoming games"
-        />
-        {q ? (
-          <button className="page-search-clear" type="button" onClick={() => updateSearch("")} aria-label="Clear search">
-            Clear
-          </button>
-        ) : isSearching || loading ? (
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#6c7e75]">…</span>
-        ) : null}
-      </div>
-
-      {trimmedQuery ? (
-        <p className="mb-4 text-xs font-semibold text-[#6c7e75]" aria-live="polite">
-          {totalCount > 0
-            ? `${totalCount} Steam result${totalCount === 1 ? "" : "s"} for “${activeTerm}” in ${REGION_NAMES[country]}`
-            : `No Steam results for “${activeTerm}” in ${REGION_NAMES[country]}`}
-        </p>
-      ) : null}
-
       {error ? (
         <div role="alert" className="card mb-6 flex items-start gap-3" style={{ borderLeft: "4px solid #ef4444" }}>
           <AlertCircle size={20} className="mt-0.5 flex-none text-[#ef4444]" />
@@ -133,7 +97,7 @@ function ComingSoonPage() {
       <div className="card mb-0">
         <div className="card-header">
           <div>
-            <h2 className="card-title">{activeTerm ? `Results for “${activeTerm}”` : "Release Calendar"}</h2>
+            <h2 className="card-title">Release Calendar</h2>
             <p className="mt-1 text-xs font-semibold text-[#6c7e75]">
               {games.length} shown · {REGION_NAMES[country]}
             </p>
@@ -164,7 +128,7 @@ function ComingSoonPage() {
             ))}
           </div>
         ) : (
-          <EmptyState searching={Boolean(activeTerm)} hasError={Boolean(error)} term={activeTerm} />
+          <EmptyState searching={false} hasError={Boolean(error)} />
         )}
 
         {!loading && hasMore ? (
