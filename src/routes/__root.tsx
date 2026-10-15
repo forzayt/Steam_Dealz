@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Steam Dealz — Live Steam Discounts, Regional Prices & Free Offers" },
+      { title: "Steam Dealz — Live Steam Discounts, Regional Prices and Free Offers" },
       {
         name: "description",
         content:
@@ -98,13 +98,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { property: "og:site_name", content: "Steam Dealz" },
-      { property: "og:title", content: "Steam Dealz — Live Steam Discounts & Regional Prices" },
+      { property: "og:title", content: "Steam Dealz — Live Steam Discounts and Regional Prices" },
       { property: "og:description", content: "Live Steam Store discounts at real regional prices — deep cuts, free offers, and a personal watch list." },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "en_US" },
       { property: "og:image", content: "https://steamdealzz.vercel.app/favicon-steam-512.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Steam Dealz — Live Steam Discounts & Regional Prices" },
+      { name: "twitter:title", content: "Steam Dealz — Live Steam Discounts and Regional Prices" },
       {
         name: "twitter:description",
         content: "Live Steam Store discounts at real regional prices — deep cuts, free offers, and a personal watch list.",

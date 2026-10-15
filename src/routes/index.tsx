@@ -28,13 +28,13 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "Steam Dealz — Live Steam Discounts, Regional Prices & Free Offers" },
+      { title: "Steam Dealz — Live Steam Discounts, Regional Prices and Free Offers" },
       {
         name: "description",
         content: "Browse live discounts from the official Steam Store — lowest regional price first, deep cuts, free offers, and deal analytics.",
       },
       { property: "og:url", content: "https://steamdealzz.vercel.app/" },
-      { property: "og:title", content: "Steam Dealz — Live Steam Discounts & Regional Prices" },
+      { property: "og:title", content: "Steam Dealz — Live Steam Discounts and Regional Prices" },
       {
         property: "og:description",
         content: "Browse live discounts from the official Steam Store — lowest regional price first, deep cuts, free offers, and deal analytics.",
