@@ -157,7 +157,7 @@ function ComingSoonPage() {
                 </div>
                 <div className="deal-grid">
                   {list.map((g) => (
-                    <DealCard key={g.appId} game={g} />
+                    <DealCard key={g.appId} game={g} releaseDate={g.releaseDate} />
                   ))}
                 </div>
               </section>

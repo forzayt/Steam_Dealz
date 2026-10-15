@@ -729,6 +729,12 @@
   text-overflow: ellipsis;
 }
 .deal-card-meta s { color: #9aa9a1; }
+.deal-release-label {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  max-width: 100%; font-weight: 700; color: var(--brand-forest-medium);
+}
+.deal-release-label > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dark .deal-release-label { color: var(--brand-lime); }
 .deal-card-foot {
   margin-top: 0.35rem;
   display: flex;

@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, AlertCircle, Bookmark, ExternalLink, Gamepad2 } from "lucide-react";
+import { ArrowUpRight, AlertCircle, Bookmark, CalendarDays, ExternalLink, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { getSteamDeals, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
@@ -184,7 +184,7 @@ export function WatchButton({ game, overlay }: { game: SteamDeal; overlay?: bool
   );
 }
 
-export function DealCard({ game, rank }: { game: SteamDeal; rank?: number }) {
+export function DealCard({ game, rank, releaseDate }: { game: SteamDeal; rank?: number; releaseDate?: string }) {
   const portrait = portraitUrl(game);
   const [src, setSrc] = useState(portrait);
   const [landscape, setLandscape] = useState(false);
@@ -231,7 +231,12 @@ export function DealCard({ game, rank }: { game: SteamDeal; rank?: number }) {
           <WatchButton game={game} />
         </div>
         <p className="deal-card-meta">
-          {game.discountPercent > 0 ? (
+          {releaseDate ? (
+            <span className="deal-release-label">
+              <CalendarDays size={12} />
+              <span>Releases {releaseDate}</span>
+            </span>
+          ) : game.discountPercent > 0 ? (
             <>
               <s>{game.originalPrice}</s>
               <span aria-hidden="true">·</span>
