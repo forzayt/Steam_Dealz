@@ -1,7 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, ArrowUpRight, Gamepad2, LoaderCircle, RefreshCw, Search, Tag } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,10 +54,20 @@ function SteamDealsPage() {
   const [games, setGames] = useState<SteamDeal[]>([]);
   const [nextStart, setNextStart] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
+
+  const trimmedQuery = q.trim().slice(0, 100);
+  const [debouncedQuery, setDebouncedQuery] = useState(trimmedQuery);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(trimmedQuery), 400);
+    return () => clearTimeout(timer);
+  }, [trimmedQuery]);
+  const isSearching = trimmedQuery !== debouncedQuery;
+  const activeTerm = debouncedQuery;
 
   useEffect(() => {
     let active = true;
@@ -66,17 +76,19 @@ function SteamDealsPage() {
     setGames([]);
     setNextStart(0);
     setHasMore(false);
+    setTotalCount(0);
 
-    fetchSteamDeals({ data: { country, start: 0 } })
+    fetchSteamDeals({ data: { country, start: 0, term: activeTerm } })
       .then((result) => {
         if (!active) return;
         setGames(result.games);
         setNextStart(result.nextStart);
         setHasMore(result.hasMore);
+        setTotalCount(result.totalCount);
         setLastUpdated(result.fetchedAt);
       })
       .catch(() => {
-        if (active) setError("Steam's deal list could not be reached. Please try again in a moment.");
+        if (active) setError(activeTerm ? `No Steam results for “${activeTerm}” could be reached. Please try again.` : "Steam's deal list could not be reached. Please try again in a moment.");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -85,14 +97,10 @@ function SteamDealsPage() {
     return () => {
       active = false;
     };
-  }, [country, fetchSteamDeals]);
+  }, [country, activeTerm, fetchSteamDeals]);
 
-  const matchingGames = useMemo(() => {
-    const query = q.trim().toLocaleLowerCase();
-    return games.filter((game) => !query || game.title.toLocaleLowerCase().includes(query));
-  }, [games, q]);
-  const paidDeals = matchingGames.filter((game) => !game.isFree);
-  const freeOffers = matchingGames.filter((game) => game.isFree);
+  const paidDeals = games.filter((game) => !game.isFree);
+  const freeOffers = games.filter((game) => game.isFree);
 
   const updateSearch = (value: string) => {
     void navigate({
@@ -105,10 +113,11 @@ function SteamDealsPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await fetchSteamDeals({ data: { country, start: 0, refresh: true } });
+      const result = await fetchSteamDeals({ data: { country, start: 0, refresh: true, term: activeTerm } });
       setGames(result.games);
       setNextStart(result.nextStart);
       setHasMore(result.hasMore);
+      setTotalCount(result.totalCount);
       setLastUpdated(result.fetchedAt);
     } catch {
       setError("Steam's deal list could not be refreshed. Your last results are still available.");
@@ -121,15 +130,18 @@ function SteamDealsPage() {
     setLoadingMore(true);
     setError("");
     try {
-      const result = await fetchSteamDeals({ data: { country, start: nextStart } });
+      const result = await fetchSteamDeals({ data: { country, start: nextStart, term: activeTerm } });
       setGames((current) => {
         const seen = new Set(current.map((game) => game.appId));
-        return [...current, ...result.games.filter((game) => !seen.has(game.appId))].sort(
+        const fresh = result.games.filter((game) => !seen.has(game.appId));
+        if (activeTerm) return [...current, ...fresh];
+        return [...current, ...fresh].sort(
           (first, second) => Number(first.isFree) - Number(second.isFree) || first.currentPriceAmount - second.currentPriceAmount,
         );
       });
       setNextStart(result.nextStart);
       setHasMore(result.hasMore);
+      setTotalCount(result.totalCount);
       setLastUpdated(result.fetchedAt);
     } catch {
       setError("More Steam deals could not be loaded. Please try again.");
@@ -165,14 +177,18 @@ function SteamDealsPage() {
         </div>
 
         <div className="steam-search mb-5 flex items-center gap-3 px-4">
-          <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          {isSearching || loading ? (
+            <LoaderCircle className="size-5 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />
+          ) : (
+            <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          )}
           <input
-            aria-label="Search games"
-            className="h-full min-w-0 flex-1 text-sm"
+            aria-label="Search all Steam games"
+            className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none"
             type="search"
             value={q}
             onChange={(event) => updateSearch(event.currentTarget.value)}
-            placeholder="Search games in loaded deals"
+            placeholder="Search all Steam games — try “elden ring”"
           />
           {q && (
             <Button variant="ghost" size="sm" onClick={() => updateSearch("")} aria-label="Clear search">
@@ -180,6 +196,13 @@ function SteamDealsPage() {
             </Button>
           )}
         </div>
+        {activeTerm && !loading && (
+          <p className="mb-5 text-xs text-muted-foreground" aria-live="polite">
+            {totalCount > 0
+              ? `${totalCount} Steam result${totalCount === 1 ? "" : "s"} for “${activeTerm}” in ${REGION_NAMES[country]}`
+              : `No Steam results for “${activeTerm}” in ${REGION_NAMES[country]}`}
+          </p>
+        )}
 
         <div className="steam-controls mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <label className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -216,8 +239,8 @@ function SteamDealsPage() {
 
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
           <div>
-            <h2 className="text-lg font-bold">Discounted games</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Lowest regional price first · {paidDeals.length} shown</p>
+            <h2 className="text-lg font-bold">{activeTerm ? `Results for “${activeTerm}”` : "Discounted games"}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{activeTerm ? `${games.length} shown` : `Lowest regional price first · ${paidDeals.length} shown`}</p>
           </div>
           <span className="text-xs text-muted-foreground">{REGION_NAMES[country]}</span>
         </div>
@@ -234,24 +257,24 @@ function SteamDealsPage() {
               </div>
             ))}
           </div>
-        ) : paidDeals.length > 0 ? (
+        ) : paidDeals.length > 0 || freeOffers.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paidDeals.map((game) => <GameCard key={game.appId} game={game} />)}
+            {[...paidDeals, ...freeOffers].map((game) => <GameCard key={game.appId} game={game} />)}
           </div>
         ) : (
-          <EmptyState searching={Boolean(q)} hasError={Boolean(error)} />
+          <EmptyState searching={Boolean(activeTerm)} hasError={Boolean(error)} term={activeTerm} />
         )}
 
         {!loading && hasMore && (
           <div className="mt-8 flex justify-center">
             <Button variant="outline" size="lg" onClick={() => void loadMore()} disabled={loadingMore}>
               {loadingMore && <LoaderCircle className="size-4 animate-spin" />}
-              {loadingMore ? "Loading deals" : "Load more deals"}
+              {loadingMore ? (activeTerm ? "Loading results" : "Loading deals") : activeTerm ? "Load more results" : "Load more deals"}
             </Button>
           </div>
         )}
 
-        {!loading && freeOffers.length > 0 && (
+        {!loading && !activeTerm && freeOffers.length > 0 && (
           <section className="mt-12 border-t border-border pt-8" aria-labelledby="free-offers-heading">
             <div className="mb-4">
               <h2 id="free-offers-heading" className="text-lg font-bold">Free offers</h2>
@@ -275,12 +298,13 @@ function SteamDealsPage() {
 }
 
 function GameCard({ game }: { game: SteamDeal }) {
+  const hasDiscount = game.discountPercent > 0;
   return (
     <article className="steam-game-card flex min-w-0 flex-col">
       <a href={game.storeUrl} target="_blank" rel="noreferrer" className="group block" aria-label={`View ${game.title} on the Steam Store`}>
         <div className="steam-cover">
           <img src={game.coverUrl} alt={`${game.title} cover`} loading="lazy" />
-          <span className="steam-discount-tag">-{game.discountPercent}%</span>
+          {hasDiscount && <span className="steam-discount-tag">-{game.discountPercent}%</span>}
         </div>
       </a>
       <div className="flex min-h-32 flex-1 flex-col justify-between gap-4 p-4">
@@ -289,7 +313,11 @@ function GameCard({ game }: { game: SteamDeal }) {
           <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </a>
         <div className="flex items-end justify-between gap-3">
-          <span className="text-xs text-steam-price-old line-through">{game.originalPrice}</span>
+          {hasDiscount ? (
+            <span className="text-xs text-steam-price-old line-through">{game.originalPrice}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">Steam price</span>
+          )}
           <span className="whitespace-nowrap rounded-sm bg-steam-deal/15 px-2.5 py-1.5 text-sm font-bold text-steam-deal">{game.currentPrice}</span>
         </div>
       </div>
@@ -297,16 +325,16 @@ function GameCard({ game }: { game: SteamDeal }) {
   );
 }
 
-function EmptyState({ searching, hasError }: { searching: boolean; hasError: boolean }) {
+function EmptyState({ searching, hasError, term }: { searching: boolean; hasError: boolean; term?: string }) {
   return (
     <div className="steam-empty-dash flex flex-col items-center justify-center px-6 py-10 text-center">
       {hasError ? <AlertCircle className="mb-3 size-8 text-destructive" /> : <Gamepad2 className="mb-3 size-8 text-muted-foreground" />}
-      <h3 className="font-semibold">{hasError ? "Deals unavailable" : searching ? "No matching games" : "No discounted games found"}</h3>
+      <h3 className="font-semibold">{hasError ? "Deals unavailable" : searching ? `No results for “${term}”` : "No discounted games found"}</h3>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {hasError
           ? "The official Store could not be reached. You can retry, or come back shortly."
           : searching
-            ? "Try another title or clear your search to see the current deals."
+            ? "Steam found nothing for that title in this region. Try another spelling or clear search for deals."
             : "There are no active paid discounts in the loaded Steam Store results for this region right now."}
       </p>
     </div>

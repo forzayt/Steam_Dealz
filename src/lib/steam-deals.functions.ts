@@ -67,7 +67,7 @@ function numericPrice(value: string): number {
   return Number(`${integer || "0"}.${fraction}`);
 }
 
-function parseDeals(html: string): SteamDeal[] {
+function parseDeals(html: string, requireDiscount = true): SteamDeal[] {
   const rows = html.match(
     /<a\b(?=[^>]*class="[^"]*\bsearch_result_row\b)[^>]*>[\s\S]*?<\/a>/gi,
   ) ?? [];
@@ -76,8 +76,9 @@ function parseDeals(html: string): SteamDeal[] {
     const appId = row.match(/data-ds-appid="(\d+)"/i)?.[1];
     const title = elementText(row, "title");
     const discountPercent = Number(row.match(/data-discount="(\d+)"/i)?.[1] ?? 0);
-    const originalPrice = elementText(row, "discount_original_price");
+    const originalRaw = elementText(row, "discount_original_price");
     const currentPrice = elementText(row, "discount_final_price");
+    const originalPrice = originalRaw || currentPrice;
     const originalAmount = numericPrice(originalPrice);
     const currentPriceAmount = numericPrice(currentPrice);
     const image = row.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1];
@@ -89,10 +90,14 @@ function parseDeals(html: string): SteamDeal[] {
       !image.startsWith("https://") ||
       !image.includes("steamstatic.com") ||
       !Number.isFinite(originalAmount) ||
-      !Number.isFinite(currentPriceAmount) ||
-      discountPercent <= 0 ||
-      currentPriceAmount >= originalAmount
+      !Number.isFinite(currentPriceAmount)
     ) {
+      return [];
+    }
+
+    if (requireDiscount) {
+      if (discountPercent <= 0 || currentPriceAmount >= originalAmount) return [];
+    } else if (currentPriceAmount > originalAmount) {
       return [];
     }
 
@@ -110,17 +115,16 @@ function parseDeals(html: string): SteamDeal[] {
   });
 }
 
-async function getSteamPage(country: SteamCountry, start: number) {
-  const key = `${country}:${start}`;
+async function getSteamPage(country: SteamCountry, start: number, term = "") {
+  const termKey = term.trim().toLocaleLowerCase().slice(0, 100);
+  const key = `${country}:${termKey}:${start}`;
   const cached = pageCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached;
 
   const params = new URLSearchParams({
-    query: "",
     start: String(start),
     count: String(PAGE_SIZE),
-    sort_by: "Price_ASC",
-    specials: "1",
+    sort_by: termKey ? "_ASC" : "Price_ASC",
     cc: country,
     l: "english",
     supportedlang: "english",
@@ -128,6 +132,12 @@ async function getSteamPage(country: SteamCountry, start: number) {
     dynamic_data: "",
     ndl: "1",
   });
+  if (termKey) {
+    params.set("term", term.trim().slice(0, 100));
+  } else {
+    params.set("query", "");
+    params.set("specials", "1");
+  }
   const response = await fetch(`https://store.steampowered.com/search/results/?${params}`, {
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(12_000),
@@ -143,7 +153,7 @@ async function getSteamPage(country: SteamCountry, start: number) {
 
   const value = {
     expiresAt: Date.now() + CACHE_TTL_MS,
-    deals: parseDeals(data.results_html),
+    deals: parseDeals(data.results_html, !termKey),
     totalCount: Number.isFinite(data.total_count) ? Number(data.total_count) : 0,
   };
   if (pageCache.size >= 36) {
@@ -158,25 +168,34 @@ const inputSchema = z.object({
   country: z.enum(STEAM_COUNTRIES),
   start: z.number().int().min(0).max(10_000).multipleOf(PAGE_SIZE),
   refresh: z.boolean().optional(),
+  term: z.string().trim().max(100).optional().default(""),
 });
 
 export const getSteamDeals = createServerFn({ method: "GET" })
   .inputValidator((input) => inputSchema.parse(input))
   .handler(async ({ data }): Promise<SteamDealsResult> => {
+    const term = (data.term ?? "").trim().slice(0, 100);
+    const termKey = term.toLocaleLowerCase();
     if (data.refresh) {
-      for (const key of pageCache.keys()) {
-        if (key.startsWith(`${data.country}:`)) pageCache.delete(key);
+      for (const key of [...pageCache.keys()]) {
+        if (!key.startsWith(`${data.country}:`)) continue;
+        if (!termKey || key === `${data.country}:${termKey}:${data.start}` || key.startsWith(`${data.country}:${termKey}:`)) {
+          pageCache.delete(key);
+        }
       }
     }
-    const starts = data.start === 0 ? [0, PAGE_SIZE, PAGE_SIZE * 2] : [data.start];
-    const pages = await Promise.all(starts.map((start) => getSteamPage(data.country, start)));
+    const starts = termKey ? [data.start] : data.start === 0 ? [0, PAGE_SIZE, PAGE_SIZE * 2] : [data.start];
+    const pages = await Promise.all(starts.map((start) => getSteamPage(data.country, start, term)));
     const uniqueDeals = new Map<string, SteamDeal>();
     for (const page of pages) {
       for (const deal of page.deals) uniqueDeals.set(deal.appId, deal);
     }
-    const games = [...uniqueDeals.values()].sort(
-      (first, second) => first.currentPriceAmount - second.currentPriceAmount || first.title.localeCompare(second.title),
-    );
+    const unordered = [...uniqueDeals.values()];
+    const games = termKey
+      ? unordered
+      : unordered.sort(
+          (first, second) => first.currentPriceAmount - second.currentPriceAmount || first.title.localeCompare(second.title),
+        );
     const totalCount = pages[0]?.totalCount ?? 0;
     const nextStart = data.start + starts.length * PAGE_SIZE;
 
