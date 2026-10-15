@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, LoaderCircle, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
 import { DealCard, DealCardSkeleton, EmptyState, REGION_NAMES, useDebouncedTerm, useSteamDeals } from "@/components/spark/deals-shared";
@@ -27,14 +27,8 @@ function DealsPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/deals" });
   const [country, setCountry] = useState<SteamCountry>("IN");
-  const [minDiscount, setMinDiscount] = useState(1);
   const { trimmedQuery, activeTerm, isSearching } = useDebouncedTerm(q);
   const { paidDeals, totalCount, loading, loadingMore, error, refresh, loadMore, hasMore } = useSteamDeals(country, activeTerm);
-
-  const visibleDeals = useMemo(
-    () => paidDeals.filter((g) => g.discountPercent >= minDiscount),
-    [paidDeals, minDiscount],
-  );
 
   const updateSearch = (value: string) => {
     void navigate({ search: (prev) => ({ ...prev, q: value }), replace: true });
@@ -73,21 +67,6 @@ function DealsPage() {
           </p>
         </div>
         <div className="page-header-actions">
-          <label className="discount-slider">
-            <span>
-              Min. off <strong>{minDiscount}%</strong>
-            </span>
-            <input
-              type="range"
-              min={1}
-              max={100}
-              step={1}
-              value={minDiscount}
-              onChange={(e) => setMinDiscount(Number(e.currentTarget.value))}
-              aria-label="Minimum discount percentage"
-              aria-valuetext={`${minDiscount} percent off or more`}
-            />
-          </label>
           <label className="flex items-center gap-2 text-[0.8rem] font-bold text-[#6c7e75]">
             <span className="hidden sm:inline">Store region</span>
             <select aria-label="Store region" className="region-select" value={country} onChange={(e) => setCountry(e.currentTarget.value as SteamCountry)}>
@@ -141,7 +120,7 @@ function DealsPage() {
           <div>
             <h2 className="card-title">{activeTerm ? `Results for “${activeTerm}”` : "All Discounted Games"}</h2>
             <p className="mt-1 text-xs font-semibold text-[#6c7e75]">
-              {visibleDeals.length} shown · {minDiscount > 1 ? `${minDiscount}%+ off · ` : ""}{REGION_NAMES[country]}
+              {paidDeals.length} shown · {REGION_NAMES[country]}
             </p>
           </div>
         </div>
@@ -152,9 +131,9 @@ function DealsPage() {
               <DealCardSkeleton key={i} />
             ))}
           </div>
-        ) : visibleDeals.length ? (
+        ) : paidDeals.length ? (
           <div className="deal-grid">
-            {visibleDeals.map((g) => (
+            {paidDeals.map((g) => (
               <DealCard key={g.appId} game={g} />
             ))}
           </div>

@@ -498,16 +498,6 @@
   padding: 0.55rem 1rem; font-size: 0.83rem; font-weight: 650; color: var(--text-main);
   outline: none; box-shadow: var(--shadow-sm); cursor: pointer; max-width: 240px;
 }
-.discount-slider {
-  display: flex; align-items: center; gap: 0.6rem;
-  font-size: 0.8rem; font-weight: 700; color: var(--text-muted-green);
-  background: #fff; border: 1px solid var(--border-light); border-radius: 50rem;
-  padding: 0.55rem 1.15rem; box-shadow: var(--shadow-sm); white-space: nowrap;
-}
-.discount-slider strong { color: var(--text-main); font-weight: 800; min-width: 4ch; }
-.discount-slider input[type="range"] { width: 130px; accent-color: var(--brand-forest-medium); cursor: pointer; }
-.dark .discount-slider { background: #131a17; border-color: #232f29; }
-.dark .discount-slider input[type="range"] { accent-color: var(--brand-lime); }
 
 /* Cards */
 .card {
