@@ -53,9 +53,6 @@ function DealsPage() {
 
   return (
     <SparkLayout
-      searchValue={q}
-      onSearchChange={updateSearch}
-      searching={isSearching || loading}
       onRefresh={() => void refresh()}
       refreshing={loading}
       notifications={notifItems}
