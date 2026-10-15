@@ -45,6 +45,25 @@ export const Route = createFileRoute("/")({
   component: SteamDealsPage,
 });
 
+function TickerArt({ appId, fallback, artKey }: { appId: string; fallback: string; artKey: string }) {
+  const primary = `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
+  const [src, setSrc] = useState(primary);
+  useEffect(() => {
+    setSrc(primary);
+  }, [primary]);
+  return (
+    <img
+      key={artKey}
+      src={src}
+      onError={() => {
+        if (src !== fallback) setSrc(fallback);
+      }}
+      alt=""
+      aria-hidden="true"
+    />
+  );
+}
+
 function SteamDealsPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/" });
@@ -184,6 +203,12 @@ function SteamDealsPage() {
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="card alert-green-card">
+          <div className="alert-green-art" aria-hidden="true">
+            {freeGame ? (
+              <TickerArt appId={freeGame.appId} fallback={freeGame.coverUrl} artKey={`${freeGame.appId}-${freeIdx}`} />
+            ) : null}
+          </div>
+          <div className="alert-green-shade" aria-hidden="true" />
           <div className="relative z-[2]">
             <span className="alert-green-badge">Free now</span>
             <div className="alert-green-date">
@@ -221,13 +246,6 @@ function SteamDealsPage() {
               <ArrowRight size={15} />
             </a>
           )}
-          <svg className="alert-green-bg-shape" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-            <g transform="translate(50,50)">
-              <rect x="-6" y="-45" width="12" height="90" rx="6" fill="#B4F105" />
-              <rect x="-6" y="-45" width="12" height="90" rx="6" fill="#B4F105" transform="rotate(60)" />
-              <rect x="-6" y="-45" width="12" height="90" rx="6" fill="#B4F105" transform="rotate(120)" />
-            </g>
-          </svg>
         </div>
 
         <div className="card">
