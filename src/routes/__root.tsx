@@ -15,18 +15,22 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "#f4f6f5" }}>
+      <div className="card mx-auto max-w-md text-center" style={{ maxWidth: 460 }}>
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold" style={{ background: "#072f1f", color: "#b4f105" }}>
+          Error 404
+        </div>
+        <h1 className="text-7xl font-extrabold">404</h1>
+        <h2 className="mt-3 text-xl font-bold">Page not found</h2>
+        <p className="mt-2 text-sm" style={{ color: "#6c7e75" }}>
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             search={{ q: "" }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="btn-quick-action mx-auto"
+            style={{ display: "inline-flex" }}
           >
             Go home
           </Link>
@@ -44,12 +48,12 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+    <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "#f4f6f5" }}>
+      <div className="card mx-auto max-w-md text-center" style={{ maxWidth: 480 }}>
+        <h1 className="text-xl font-bold tracking-tight">
           This page didn't load
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm" style={{ color: "#6c7e75" }}>
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -58,13 +62,14 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="btn-quick-action"
           >
             Try again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="btn-date-picker"
+            style={{ textDecoration: "none" }}
           >
             Go home
           </a>
@@ -93,8 +98,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon-steam.png", type: "image/png" },
+      { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
