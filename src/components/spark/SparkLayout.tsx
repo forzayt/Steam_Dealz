@@ -1,34 +1,22 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  BarChart3,
   Bookmark,
-  Check,
-  ChevronDown,
-  Download,
   ExternalLink,
   Gift,
   LayoutDashboard,
   LifeBuoy,
   Menu,
   Moon,
-  RefreshCw,
   Settings,
   Sun,
   Tags,
   X,
 } from "lucide-react";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
 export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "analytics";
 
 export function SparkLayout({
   children,
-  onRefresh,
-  refreshing,
   activeNav = "dashboard",
   onNav,
 }: {
@@ -41,10 +29,6 @@ export function SparkLayout({
 }) {
   const [minimized] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showInstall, setShowInstall] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
   const [hoverOpen, setHoverOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -53,8 +37,6 @@ export function SparkLayout({
     }
     return false;
   });
-  const profileRef = useRef<HTMLDivElement>(null);
-  const installRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSidebarEnter = () => {
@@ -83,51 +65,6 @@ export function SparkLayout({
       /* noop */
     }
   }, [isDark]);
-
-  useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (profileRef.current && !profileRef.current.contains(t)) setShowProfile(false);
-      if (installRef.current && !installRef.current.contains(t)) setShowInstall(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-
-  useEffect(() => {
-    const onBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-    };
-    const onInstalled = () => {
-      setInstalled(true);
-      setInstallPrompt(null);
-      setShowInstall(false);
-    };
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
-  }, []);
-
-  const handleInstall = async () => {
-    if (!installPrompt) return;
-    try {
-      await installPrompt.prompt();
-      await installPrompt.userChoice;
-    } catch {
-      /* noop */
-    } finally {
-      setInstallPrompt(null);
-      setShowInstall(false);
-    }
-  };
-
-  const isIos = () =>
-    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   const go = (key: SparkNavKey, href: string) => {
     setMobileOpen(false);
@@ -277,48 +214,6 @@ export function SparkLayout({
           </div>
 
           <div className="navbar-actions">
-            <div className="relative" ref={installRef}>
-              <button
-                className="navbar-action-btn"
-                aria-label="Install shortcut"
-                title="Install shortcut"
-                type="button"
-                onClick={() => {
-                  setShowInstall((v) => !v);
-                  setShowProfile(false);
-                }}
-              >
-                {installed ? <Check size={18} /> : <Download size={18} />}
-              </button>
-              {showInstall ? (
-                <div className="spark-pop" style={{ top: "calc(100% + 10px)", right: 0, width: 280 }}>
-                  <div className="spark-pop-header">Install shortcut</div>
-                  <div className="px-4 pb-3 text-[0.8rem] font-semibold leading-6 text-[#6c7e75]">
-                    {installPrompt ? (
-                      <p className="m-0">Add Steam Dealz to your home screen for quick access to live deals.</p>
-                    ) : isIos() ? (
-                      <p className="m-0">
-                        Tap <strong>Share</strong> in Safari, then choose <strong>Add to Home Screen</strong>.
-                      </p>
-                    ) : (
-                      <p className="m-0">
-                        Open the browser menu and choose <strong>Install Steam Dealz…</strong> or{" "}
-                        <strong>Add to Home screen</strong>.
-                      </p>
-                    )}
-                  </div>
-                  {installPrompt ? (
-                    <div className="px-4 pb-4">
-                      <button className="btn-quick-action w-full justify-center" type="button" onClick={handleInstall}>
-                        <Download size={15} />
-                        <span>Install</span>
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-
             <button
               className="navbar-action-btn"
               type="button"
@@ -327,57 +222,6 @@ export function SparkLayout({
               onClick={() => setIsDark((v) => !v)}
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
-            <div className="relative" ref={profileRef}>
-              <button
-                className="navbar-profile-btn"
-                type="button"
-                onClick={() => {
-                  setShowProfile((v) => !v);
-                }}
-              >
-                <img
-                  src="/avatar.png"
-                  alt="Profile"
-                  className="navbar-profile-img"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop";
-                  }}
-                />
-                <span className="navbar-profile-name hidden md:inline">Deal Hunter</span>
-                <ChevronDown size={14} className="text-[#6c7e75]" />
-              </button>
-              {showProfile ? (
-                <div className="spark-pop" style={{ top: "calc(100% + 10px)", right: 0, width: 210 }}>
-                  <div className="spark-pop-header">Welcome!</div>
-                  <a className="spark-pop-item" href="/#analytics" onClick={() => setShowProfile(false)}>
-                    <BarChart3 size={16} /> Analytics
-                  </a>
-                  <a className="spark-pop-item" href="/deals" onClick={() => setShowProfile(false)}>
-                    <Settings size={16} /> Store region
-                  </a>
-                  <a
-                    className="spark-pop-item"
-                    href="https://store.steampowered.com/"
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => setShowProfile(false)}
-                  >
-                    <ExternalLink size={16} /> Steam Store
-                  </a>
-                </div>
-              ) : null}
-            </div>
-
-            <button
-              className="btn-quick-action md:hidden"
-              type="button"
-              onClick={onRefresh}
-              title="Refresh"
-              disabled={refreshing}
-            >
-              <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
             </button>
           </div>
         </header>
