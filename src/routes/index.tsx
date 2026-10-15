@@ -25,7 +25,7 @@ const REGION_NAMES: Record<SteamCountry, string> = {
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : "",
+    q: typeof search["q"] === "string" ? search["q"] : "",
   }),
   head: () => ({
     meta: [
@@ -96,7 +96,7 @@ function SteamDealsPage() {
 
   const updateSearch = (value: string) => {
     void navigate({
-      search: (previous) => ({ ...previous, q: value || undefined }),
+      search: (previous) => ({ ...previous, q: value }),
       replace: true,
     });
   };
