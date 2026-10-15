@@ -219,6 +219,20 @@
   background: var(--brand-lime);
   color: var(--brand-forest-dark);
   flex: none;
+  overflow: hidden;
+}
+.sidebar-brand-mark--logo {
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50rem;
+}
+.sidebar-brand-mark--logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50rem;
 }
 .sidebar-menu-section { margin-bottom: 1.6rem; }
 .sidebar-menu-title {
@@ -531,7 +545,8 @@
   font-size: 0.83rem; color: var(--text-muted-green);
 }
 .footer-left { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
-.footer-logo { font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.35rem; }
+.footer-logo { font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.45rem; }
+.footer-logo-img { width: 1.5rem; height: 1.5rem; border-radius: 50rem; object-fit: cover; display: block; }
 .footer-links { list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 1.3rem; }
 .footer-link { color: var(--text-muted-green); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; }
 .footer-link:hover { color: var(--brand-forest-dark); }

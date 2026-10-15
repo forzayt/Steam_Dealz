@@ -5,7 +5,6 @@ import {
   Bell,
   ChevronDown,
   ExternalLink,
-  Gamepad2,
   Gift,
   LayoutDashboard,
   LifeBuoy,
@@ -123,8 +122,8 @@ export function SparkLayout({
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         >
-          <span className="sidebar-brand-mark">
-            <Gamepad2 size={20} strokeWidth={2.4} />
+          <span className="sidebar-brand-mark sidebar-brand-mark--logo">
+            <img src="/favicon-steam.png" alt="Steam Dealz logo" />
           </span>
           <span>Steam Dealz</span>
         </a>
@@ -372,7 +371,7 @@ export function SparkLayout({
         <footer className="footer-custom" id="about">
           <div className="footer-left">
             <span className="footer-logo">
-              <Gamepad2 size={15} /> Steam Dealz
+              <img src="/favicon-steam.png" alt="Steam Dealz logo" className="footer-logo-img" /> Steam Dealz
             </span>
             <span style={{ color: "#dde5e1" }}>|</span>
             <span>© 2026 Official Steam Store prices · Valve trademarks belong to their owners</span>
