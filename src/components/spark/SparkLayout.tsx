@@ -44,7 +44,7 @@ export function SparkLayout({
       const stored = window.localStorage.getItem("steam-dealz-theme");
       if (stored) return stored === "dark";
     }
-    return true;
+    return false;
   });
   const profileRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

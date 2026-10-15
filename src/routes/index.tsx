@@ -15,8 +15,6 @@ import { useMemo, useState } from "react";
 import { SparkLayout } from "@/components/spark/SparkLayout";
 import { Donut, RevenueBars, Sparkline } from "@/components/spark/SparkCharts";
 import {
-  DealCard,
-  DealCardSkeleton,
   ProgressRow,
   REGION_NAMES,
   useDebouncedTerm,
@@ -253,40 +251,17 @@ function SteamDealsPage() {
             <RevenueBars data={bars} />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_1fr]">
-            <div className="card mb-0 flex flex-col">
-              <div className="card-header">
-                <h2 className="card-title">Top Transactions</h2>
-                <span className="badge-table success">{paidDeals.length} paid</span>
-              </div>
-              <div className="deal-grid deal-grid--compact">
-                {loading
-                  ? Array.from({ length: 4 }, (_, i) => <DealCardSkeleton key={i} />)
-                  : paidDeals.slice(0, 4).map((g) => <DealCard key={g.appId} game={g} />)}
-              </div>
-              {!loading && paidDeals.length === 0 ? (
-                <p className="mt-3 text-sm text-[#6c7e75]">No paid discounts loaded yet.</p>
-              ) : null}
-              <a href="/deals" className="alert-green-link mt-4" style={{ color: "#072f1f" }}>
-                <span>See all discounted games</span> <ArrowRight size={15} />
-              </a>
-              <a href="/free-offers" className="alert-green-link mt-2" style={{ color: "#072f1f" }}>
-                <span>See all free offers</span> <ArrowRight size={15} />
-              </a>
+          <div className="card mb-0">
+            <div className="card-header">
+              <h2 className="card-title">Deal Breakdown</h2>
+              <Flame size={18} className="text-[#f97316]" />
             </div>
-
-            <div className="card mb-0">
-              <div className="card-header">
-                <h2 className="card-title">Deal Breakdown</h2>
-                <Flame size={18} className="text-[#f97316]" />
-              </div>
-              <ProgressRow label="Total tracked" value={games.length} width={100} color="#072f1f" />
-              <ProgressRow label="Deep cuts · 50–75%" value={stats.mid} width={pct(stats.mid)} color="#b4f105" />
-              <ProgressRow label="Mega deals · 75%+" value={stats.mega} width={pct(stats.mega)} color="#072f1f" />
-              <ProgressRow label="Standard · under 50%" value={stats.standard} width={pct(stats.standard)} color="#b4f105" muted />
-              <ProgressRow label="Light cuts · under 25%" value={stats.low} width={pct(stats.low)} color="#f97316" />
-              <ProgressRow label="Free offers" value={freeOffers.length} width={pct(freeOffers.length)} color="#072f1f" />
-            </div>
+            <ProgressRow label="Total tracked" value={games.length} width={100} color="#072f1f" />
+            <ProgressRow label="Deep cuts · 50–75%" value={stats.mid} width={pct(stats.mid)} color="#b4f105" />
+            <ProgressRow label="Mega deals · 75%+" value={stats.mega} width={pct(stats.mega)} color="#072f1f" />
+            <ProgressRow label="Standard · under 50%" value={stats.standard} width={pct(stats.standard)} color="#b4f105" muted />
+            <ProgressRow label="Light cuts · under 25%" value={stats.low} width={pct(stats.low)} color="#f97316" />
+            <ProgressRow label="Free offers" value={freeOffers.length} width={pct(freeOffers.length)} color="#072f1f" />
           </div>
         </div>
 
