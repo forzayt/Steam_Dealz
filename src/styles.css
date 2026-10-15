@@ -122,26 +122,26 @@
 }
 
 .dark {
-  --background: #f4f6f5;
-  --foreground: #0b130f;
-  --card: #ffffff;
-  --card-foreground: #0b130f;
-  --popover: #ffffff;
-  --popover-foreground: #0b130f;
-  --primary: #072f1f;
-  --primary-foreground: #ffffff;
-  --secondary: #e9efef;
-  --secondary-foreground: #0b130f;
-  --muted: #edf2ef;
-  --muted-foreground: #6c7e75;
-  --accent: #e4f7b2;
-  --accent-foreground: #051c12;
+  --background: #0a0e0d;
+  --foreground: #e8efec;
+  --card: #131a17;
+  --card-foreground: #e8efec;
+  --popover: #161e1b;
+  --popover-foreground: #e8efec;
+  --primary: #b4f105;
+  --primary-foreground: #051c12;
+  --secondary: #1c2621;
+  --secondary-foreground: #e8efec;
+  --muted: #1a2420;
+  --muted-foreground: #9db3a8;
+  --accent: #243528;
+  --accent-foreground: #e4f7b2;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e9efef;
-  --input: #dde5e1;
-  --ring: #072f1f;
-  --chart-1: #072f1f;
+  --border: #232f29;
+  --input: #2a3a32;
+  --ring: #b4f105;
+  --chart-1: #b4f105;
   --chart-2: #b4f105;
   --chart-3: #f97316;
   --chart-4: #22c55e;
@@ -154,6 +154,11 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #b4f105;
+
+  --card-background: #131a17;
+  --text-main: #eaf2ed;
+  --text-muted-green: #9db3a8;
+  --border-light: #232f29;
 }
 
 @layer base {
@@ -765,6 +770,47 @@
 .badge-table.success { background: rgba(34,197,94,0.12); color: #15803d; }
 .badge-table.pending { background: rgba(249,115,22,0.12); color: #c2410c; }
 .badge-table.free { background: var(--brand-forest-medium); color: #fff; }
+
+/* Dark mode component overrides (hardcoded light surfaces) */
+.dark .navbar-custom { background-color: rgba(10, 14, 13, 0.88); border-bottom-color: rgba(255, 255, 255, 0.08); }
+.dark .navbar-brand { color: #fff; }
+.dark .navbar-search-input, .dark .page-search-input {
+  background: #131a17; border-color: #232f29; color: #e8efec; box-shadow: none;
+}
+.dark .navbar-search-input::placeholder, .dark .page-search-input::placeholder { color: #7d938a; }
+.dark .page-search-icon { color: #7d938a; }
+.dark .page-search-clear { background: #1c2621; border-color: #232f29; color: #e8efec; }
+.dark .page-search-clear:hover { background: #24352d; }
+.dark .navbar-action-btn, .dark .sidebar-toggle-btn, .dark .btn-desktop-toggle {
+  background: #131a17; border-color: #232f29; color: #e8efec;
+}
+.dark .navbar-action-btn:hover, .dark .sidebar-toggle-btn:hover { background: #1c2621; }
+.dark .navbar-profile-btn:hover { background: #131a17; }
+.dark .navbar-profile-name { color: #e8efec; }
+.dark .btn-date-picker, .dark .region-select { background: #131a17; border-color: #232f29; color: #e8efec; box-shadow: none; }
+.dark .btn-date-picker:hover { background: #1c2621; }
+.dark .region-select option { background: #131a17; color: #e8efec; }
+.dark .btn-quick-action { background: var(--brand-lime); color: var(--brand-forest-dark); }
+.dark .btn-quick-action:hover { background: var(--brand-lime-hover); }
+.dark .card { background: var(--card-background); border-color: rgba(255, 255, 255, 0.08); }
+.dark .deal-row, .dark .deal-card { background: #131a17; border-color: rgba(255, 255, 255, 0.08); }
+.dark .deal-row:hover { background: #182019; border-color: rgba(180, 241, 5, 0.3); }
+.dark .deal-card:hover { border-color: rgba(180, 241, 5, 0.35); }
+.dark .deal-card-media { background: #0c1210; }
+.dark .deal-thumb { background: #0c1210; }
+.dark .deal-card-more { color: #9db3a8; }
+.dark .deal-card-more:hover { background: #1c2621; color: #fff; }
+.dark .deal-card-open { color: var(--brand-lime); }
+.dark .spark-pop { background: #161e1b; border-color: #232f29; }
+.dark .spark-pop-item { color: #e8efec; }
+.dark .spark-pop-item:hover { background: #1c2621; }
+.dark .spark-empty { background: #131a17; border-color: #2a3a32; }
+.dark .chart-legends-container { background: #0c1210; }
+.dark .progress { background: #0c1210; }
+.dark .promo-banner-card { background: #131a17; }
+.dark .promo-title { color: #fff; }
+.dark .promo-desc { color: #9db3a8; }
+.dark .footer-custom { border-top-color: rgba(255, 255, 255, 0.08); }
 
 .sidebar-overlay {
   position: fixed; inset: 0; background: rgba(5,28,18,0.45); z-index: 1029;

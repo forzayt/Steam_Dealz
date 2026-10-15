@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   BarChart3,
-  Bell,
   ChevronDown,
   ExternalLink,
   Gift,
@@ -10,8 +9,10 @@ import {
   Maximize,
   Menu,
   Minimize2,
+  Moon,
   RefreshCw,
   Settings,
+  Sun,
   Tags,
   X,
 } from "lucide-react";
@@ -22,24 +23,28 @@ export function SparkLayout({
   children,
   onRefresh,
   refreshing,
-  notifications,
   activeNav = "dashboard",
   onNav,
 }: {
   children: ReactNode;
   onRefresh: () => void;
   refreshing?: boolean;
-  notifications: { title: string; meta: string; discount: number }[];
+  notifications?: { title: string; meta: string; discount: number }[];
   activeNav?: SparkNavKey;
   onNav?: (key: SparkNavKey, href: string) => void;
 }) {
   const [minimized] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hoverOpen, setHoverOpen] = useState(false);
-  const notifRef = useRef<HTMLDivElement>(null);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem("steam-dealz-theme");
+      if (stored) return stored === "dark";
+    }
+    return true;
+  });
   const profileRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -62,9 +67,17 @@ export function SparkLayout({
   const collapsed = minimized && !hoverOpen;
 
   useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+    try {
+      window.localStorage.setItem("steam-dealz-theme", isDark ? "dark" : "light");
+    } catch {
+      /* noop */
+    }
+  }, [isDark]);
+
+  useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (notifRef.current && !notifRef.current.contains(t)) setShowNotif(false);
       if (profileRef.current && !profileRef.current.contains(t)) setShowProfile(false);
     };
     document.addEventListener("mousedown", onDoc);
@@ -238,51 +251,15 @@ export function SparkLayout({
               {isFullscreen ? <Minimize2 size={18} /> : <Maximize size={18} />}
             </button>
 
-            <div className="relative" ref={notifRef}>
-              <button
-                className="navbar-action-btn"
-                type="button"
-                aria-label="Notifications"
-                onClick={() => {
-                  setShowNotif((v) => !v);
-                  setShowProfile(false);
-                }}
-              >
-                <Bell size={18} />
-                {notifications.length ? <span className="navbar-action-badge" /> : null}
-              </button>
-              {showNotif ? (
-                <div className="spark-pop" style={{ top: "calc(100% + 10px)", right: 0, width: 320 }}>
-                  <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #e9efef" }}>
-                    <h6 className="m-0 text-sm font-bold">Top discounts</h6>
-                    <span className="text-xs font-bold text-[#072f1f]">{notifications.length} live</span>
-                  </div>
-                  <div style={{ maxHeight: 280, overflowY: "auto" }}>
-                    {notifications.length === 0 ? (
-                      <p className="px-4 py-4 text-sm text-[#6c7e75]">No deals loaded yet.</p>
-                    ) : (
-                      notifications.slice(0, 5).map((n) => (
-                        <div key={n.title} className="flex items-start gap-3 px-4 py-3" style={{ borderBottom: "1px solid #eef2f0" }}>
-                          <div
-                            className="grid size-9 flex-none place-items-center rounded-full text-xs font-extrabold"
-                            style={{ background: "#072f1f", color: "#b4f105" }}
-                          >
-                            -{n.discount}%
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[0.8rem] font-bold leading-5">{n.title}</p>
-                            <span className="text-xs text-[#6c7e75]">{n.meta}</span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  <a href="/deals" onClick={() => setShowNotif(false)} className="block px-4 py-3 text-center text-[0.8rem] font-bold text-[#072f1f]">
-                    View all deals
-                  </a>
-                </div>
-              ) : null}
-            </div>
+            <button
+              className="navbar-action-btn"
+              type="button"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setIsDark((v) => !v)}
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
 
             <div className="relative" ref={profileRef}>
               <button
@@ -290,7 +267,6 @@ export function SparkLayout({
                 type="button"
                 onClick={() => {
                   setShowProfile((v) => !v);
-                  setShowNotif(false);
                 }}
               >
                 <img
