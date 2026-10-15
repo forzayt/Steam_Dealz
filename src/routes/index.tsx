@@ -2,8 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   AlertCircle,
   ArrowRight,
-  CalendarDays,
-  ChevronDown,
   ExternalLink,
   Flame,
   MoreHorizontal,
@@ -47,7 +45,7 @@ function SteamDealsPage() {
   const navigate = useNavigate({ from: "/" });
   const [country, setCountry] = useState<SteamCountry>("IN");
   const { trimmedQuery, activeTerm } = useDebouncedTerm(q);
-  const { games, paidDeals, freeOffers, totalCount, loading, error, lastUpdated, refresh, hasMore } =
+  const { games, paidDeals, freeOffers, totalCount, loading, error, refresh, hasMore } =
     useSteamDeals(country, activeTerm);
 
   const stats = useMemo(() => {
@@ -88,10 +86,6 @@ function SteamDealsPage() {
 
   const sparkA = useMemo(() => paidDeals.slice(0, 12).map((g) => g.discountPercent), [paidDeals]);
   const sparkB = useMemo(() => [...paidDeals].slice(0, 12).map((g) => 100 - g.discountPercent), [paidDeals]);
-
-  const updatedLabel = lastUpdated
-    ? new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "Live";
 
   const notifItems = [...paidDeals]
     .sort((a, b) => b.discountPercent - a.discountPercent)
@@ -146,11 +140,6 @@ function SteamDealsPage() {
               ))}
             </select>
           </label>
-          <span className="btn-date-picker" title="Last synced">
-            <CalendarDays size={16} />
-            <span>Updated {updatedLabel}</span>
-            <ChevronDown size={14} />
-          </span>
           <button className="btn-quick-action" type="button" onClick={() => void refresh()} disabled={loading}>
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
             <span>Refresh</span>
@@ -181,7 +170,7 @@ function SteamDealsPage() {
         <div className="card alert-green-card">
           <div className="relative z-[2]">
             <span className="alert-green-badge">Top deal</span>
-            <div className="alert-green-date">{REGION_NAMES[country]} · Updated {updatedLabel}</div>
+            <div className="alert-green-date">{REGION_NAMES[country]}</div>
             <div className="alert-green-text">
               {stats.maxDeal ? `${stats.maxDeal.title} — ${stats.maxDeal.discountPercent}% off` : "Scanning Steam specials…"}
             </div>
@@ -270,7 +259,7 @@ function SteamDealsPage() {
                 <h2 className="card-title">Top Transactions</h2>
                 <span className="badge-table success">{paidDeals.length} paid</span>
               </div>
-              <div className="deal-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+              <div className="deal-grid deal-grid--compact">
                 {loading
                   ? Array.from({ length: 4 }, (_, i) => <DealCardSkeleton key={i} />)
                   : paidDeals.slice(0, 4).map((g) => <DealCard key={g.appId} game={g} />)}

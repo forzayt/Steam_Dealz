@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, CalendarDays, ChevronDown, LoaderCircle, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, LoaderCircle, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
@@ -24,15 +24,11 @@ function DealsPage() {
   const navigate = useNavigate({ from: "/deals" });
   const [country, setCountry] = useState<SteamCountry>("IN");
   const { trimmedQuery, activeTerm, isSearching } = useDebouncedTerm(q);
-  const { paidDeals, totalCount, loading, loadingMore, error, lastUpdated, refresh, loadMore, hasMore } = useSteamDeals(country, activeTerm);
+  const { paidDeals, totalCount, loading, loadingMore, error, refresh, loadMore, hasMore } = useSteamDeals(country, activeTerm);
 
   const updateSearch = (value: string) => {
     void navigate({ search: (prev) => ({ ...prev, q: value }), replace: true });
   };
-
-  const updatedLabel = lastUpdated
-    ? new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "Live";
 
   const notifItems = [...paidDeals]
     .sort((a, b) => b.discountPercent - a.discountPercent)
@@ -75,11 +71,6 @@ function DealsPage() {
               ))}
             </select>
           </label>
-          <span className="btn-date-picker" title="Last synced">
-            <CalendarDays size={16} />
-            <span>Updated {updatedLabel}</span>
-            <ChevronDown size={14} />
-          </span>
           <button className="btn-quick-action" type="button" onClick={() => void refresh()} disabled={loading}>
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
             <span>Refresh</span>

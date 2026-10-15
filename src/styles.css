@@ -536,11 +536,25 @@
 
 /* Deal list = Spark custom list */
 .custom-list { display: flex; flex-direction: column; gap: 0.7rem; }
-/* Large vertical card grid (library-style) */
+/* Large vertical card grid (library-style) — max 5 per row */
 .deal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1.1rem;
+}
+.deal-grid--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 1400px) {
+  .deal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .deal-grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1024px) {
+  .deal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .deal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+  .deal-grid--compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .deal-card {
   display: flex;
@@ -781,7 +795,6 @@
 @media (max-width: 768px) {
   .page-header { flex-direction: column; align-items: stretch; }
   .deal-thumb { width: 5.2rem; }
-  .deal-grid { grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 0.85rem; }
   .stat-value { font-size: 1.6rem; }
 }
 
