@@ -12,12 +12,13 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
-import { Donut, RevenueBars, Sparkline } from "@/components/spark/SparkCharts";
+import { Donut, Sparkline } from "@/components/spark/SparkCharts";
 import {
   ProgressRow,
   REGION_NAMES,
   useDebouncedTerm,
   useSteamDeals,
+  useSteamEvents,
 } from "@/components/spark/deals-shared";
 import { STEAM_COUNTRIES, type SteamCountry } from "@/lib/steam-deals.functions";
 
@@ -83,32 +84,28 @@ function SteamDealsPage() {
     return { maxDeal, avg, deep, mega, standard, mid, low };
   }, [games, paidDeals]);
 
-  const bars = useMemo(() => {
-    const buckets = [
-      { label: "< ₹500", test: (p: number) => p < 500 },
-      { label: "₹500–1k", test: (p: number) => p >= 500 && p < 1000 },
-      { label: "₹1–2k", test: (p: number) => p >= 1000 && p < 2000 },
-      { label: "₹2k+", test: (p: number) => p >= 2000 },
-    ];
-    const generic = [
-      { label: "Budget", test: (_p: number, i: number) => i % 4 === 0 },
-      { label: "Mid", test: (_p: number, i: number) => i % 4 === 1 },
-      { label: "Core", test: (_p: number, i: number) => i % 4 === 2 },
-      { label: "Premium", test: (_p: number, i: number) => i % 4 === 3 },
-    ];
-    const defs = country !== "IN" ? generic : buckets;
-    return defs.map((b) => {
-      const inBucket = paidDeals.filter((g, i) => (b.test as (p: number, i: number) => boolean)(g.currentPriceAmount, i));
-      return {
-        label: b.label,
-        income: inBucket.length,
-        expenses: inBucket.filter((g) => g.discountPercent >= 50).length,
-      };
-    });
-  }, [paidDeals, country]);
-
   const sparkA = useMemo(() => paidDeals.slice(0, 12).map((g) => g.discountPercent), [paidDeals]);
   const sparkB = useMemo(() => [...paidDeals].slice(0, 12).map((g) => 100 - g.discountPercent), [paidDeals]);
+
+  const topEventGames = useMemo(
+    () =>
+      [...paidDeals]
+        .sort((a, b) => b.discountPercent - a.discountPercent)
+        .slice(0, 6)
+        .map((g) => ({ appId: g.appId, title: g.title })),
+    [paidDeals],
+  );
+  const { events, loading: eventsLoading } = useSteamEvents(topEventGames);
+  const [eventIdx, setEventIdx] = useState(0);
+  useEffect(() => {
+    setEventIdx(0);
+  }, [country, activeTerm]);
+  useEffect(() => {
+    if (events.length < 2) return;
+    const t = setInterval(() => setEventIdx((i) => (i + 1) % events.length), 3500);
+    return () => clearInterval(t);
+  }, [events.length]);
+  const event = events.length ? events[eventIdx % events.length] : undefined;
 
   const [freeIdx, setFreeIdx] = useState(0);
   useEffect(() => {
@@ -284,25 +281,48 @@ function SteamDealsPage() {
       {/* Main grid — dashboard only, full lists live on /deals and /free-offers */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col gap-6">
-          <div className="card mb-0" id="analytics">
-            <div className="card-header mb-2">
-              <h2 className="card-title">Discount Analytics</h2>
-              <div className="flex items-center gap-4">
-                <div className="chart-legend-item">
-                  <span className="legend-dot" style={{ background: "#072f1f" }} />
-                  <span className="text-xs font-bold">Deals</span>
-                </div>
-                <div className="chart-legend-item">
-                  <span className="legend-dot" style={{ background: "#b4f105" }} />
-                  <span className="text-xs font-bold">Deep cuts</span>
-                </div>
+          <div className={`card alert-green-card mb-0${!eventsLoading && event ? " alert-green-clickable" : ""}`} id="events">
+            <div className="alert-green-art" aria-hidden="true">
+              {event ? (
+                <TickerArt appId={event.appId} fallback={event.coverUrl} artKey={`${event.appId}-${eventIdx}`} />
+              ) : null}
+            </div>
+            <div className="alert-green-shade" aria-hidden="true" />
+            <div className="relative z-[2]">
+              <span className="alert-green-badge">Events</span>
+              <div className="alert-green-date">
+                {REGION_NAMES[country]}
+                {events.length > 1 ? ` · ${Math.min(eventIdx + 1, events.length)} / ${events.length}` : null}
               </div>
+              {eventsLoading ? (
+                <div className="alert-green-text">Loading Steam events…</div>
+              ) : event ? (
+                <div key={`${event.appId}-${eventIdx}`} className="alert-green-text alert-green-ticker">
+                  {event.gameTitle} — {event.title}
+                </div>
+              ) : (
+                <div className="alert-green-text">No Steam events right now</div>
+              )}
             </div>
-            <div className="mb-3 flex items-baseline gap-2">
-              <span className="text-[1.6rem] font-extrabold">{stats.avg}% avg off</span>
-              <span className="trend-badge trend-up text-xs">live Steam prices</span>
-            </div>
-            <RevenueBars data={bars} />
+            {eventsLoading || !event ? (
+              <span className="alert-green-link z-[2]">
+                <span>{eventsLoading ? "Fetching live announcements…" : "Check back soon"}</span>
+              </span>
+            ) : (
+              <span key={`event-link-${event.appId}-${eventIdx}`} className="alert-green-link z-[2]">
+                <span>Read event</span>
+                <ArrowRight size={15} />
+              </span>
+            )}
+            {!eventsLoading && event ? (
+              <a
+                href={event.url}
+                target="_blank"
+                rel="noreferrer"
+                className="alert-green-stretch"
+                aria-label={`Read Steam event: ${event.title}`}
+              />
+            ) : null}
           </div>
 
           <div className="card mb-0">

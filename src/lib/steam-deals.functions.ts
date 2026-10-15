@@ -16,6 +16,19 @@ export type SteamDeal = {
   isFree: boolean;
 };
 
+export type SteamEvent = {
+  appId: string;
+  gameTitle: string;
+  title: string;
+  url: string;
+  date: number;
+  author: string;
+  coverUrl: string;
+};
+
+const NEWS_TTL_MS = 15 * 60_000;
+const newsCache = new Map<string, { expiresAt: number; events: SteamEvent[] }>();
+
 export type SteamDealsResult = {
   country: SteamCountry;
   games: SteamDeal[];
@@ -207,4 +220,80 @@ export const getSteamDeals = createServerFn({ method: "GET" })
       hasMore: nextStart < totalCount,
       fetchedAt: new Date().toISOString(),
     };
+  });
+
+const eventsInputSchema = z.object({
+  games: z
+    .array(z.object({ appId: z.string().regex(/^\d{1,10}$/), title: z.string().min(1).max(200) }))
+    .min(1)
+    .max(8),
+});
+
+type SteamNewsItem = {
+  title?: unknown;
+  url?: unknown;
+  author?: unknown;
+  date?: unknown;
+};
+
+/** Live Steam announcements for the given games (official ISteamNews feed, cached briefly). */
+export const getSteamEvents = createServerFn({ method: "GET" })
+  .inputValidator((input) => eventsInputSchema.parse(input))
+  .handler(async ({ data }): Promise<{ events: SteamEvent[]; fetchedAt: string }> => {
+    const key = data.games
+      .map((g) => g.appId)
+      .sort()
+      .join(",");
+    const cached = newsCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) {
+      return { events: cached.events, fetchedAt: new Date().toISOString() };
+    }
+
+    const perGame = await Promise.all(
+      data.games.map(async (game) => {
+        try {
+          const response = await fetch(
+            `https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${game.appId}&count=2&maxlength=0&format=json`,
+            {
+              headers: { Accept: "application/json" },
+              signal: AbortSignal.timeout(8_000),
+            },
+          );
+          if (!response.ok) return [];
+          const payload: unknown = await response.json();
+          const items =
+            (payload as { appnews?: { newsitems?: SteamNewsItem[] } })?.appnews?.newsitems ?? [];
+          return items.slice(0, 2).flatMap((item) => {
+            const title = typeof item.title === "string" ? item.title.trim() : "";
+            const url = typeof item.url === "string" ? item.url : "";
+            const date = typeof item.date === "number" && Number.isFinite(item.date) ? item.date : 0;
+            if (!title || !url.startsWith("https://")) return [];
+            return [
+              {
+                appId: game.appId,
+                gameTitle: game.title,
+                title,
+                url,
+                date,
+                author: typeof item.author === "string" ? item.author : "",
+                coverUrl: `https://cdn.akamai.steamstatic.com/steam/apps/${game.appId}/header.jpg`,
+              },
+            ];
+          });
+        } catch {
+          return [];
+        }
+      }),
+    );
+
+    const events = perGame
+      .flat()
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 6);
+    if (newsCache.size >= 24) {
+      const oldestKey = newsCache.keys().next().value;
+      if (oldestKey) newsCache.delete(oldestKey);
+    }
+    newsCache.set(key, { expiresAt: Date.now() + NEWS_TTL_MS, events });
+    return { events, fetchedAt: new Date().toISOString() };
   });

@@ -223,7 +223,7 @@ export function SparkLayout({
           <div>
             <ul className="footer-links">
               <li><a href="/" className="footer-link">Overview</a></li>
-              <li><a href="/#analytics" className="footer-link">Statistics</a></li>
+              <li><a href="/#events" className="footer-link">Events</a></li>
               <li><a href="/deals" className="footer-link">Discounted Games</a></li>
               <li><a href="/free-offers" className="footer-link">Free Offers <span className="status-dot" /></a></li>
             </ul>

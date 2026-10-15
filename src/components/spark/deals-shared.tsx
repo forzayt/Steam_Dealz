@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, AlertCircle, Bookmark, ExternalLink, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { getSteamDeals, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
+import { getSteamDeals, getSteamEvents, type SteamCountry, type SteamDeal, type SteamEvent } from "@/lib/steam-deals.functions";
 import { useWatchlist } from "@/lib/watchlist";
 
 export const REGION_NAMES: Record<SteamCountry, string> = {
@@ -107,6 +107,39 @@ export function useSteamDeals(country: SteamCountry, activeTerm: string) {
   const freeOffers = useMemo(() => games.filter((g) => g.isFree), [games]);
 
   return { games, paidDeals, freeOffers, nextStart, hasMore, totalCount, loading, loadingMore, error, setError, lastUpdated, refresh, loadMore };
+}
+
+export function useSteamEvents(games: { appId: string; title: string }[]) {
+  const fetchSteamEvents = useServerFn(getSteamEvents);
+  const [events, setEvents] = useState<SteamEvent[]>([]);
+  const [loading, setLoading] = useState(false);
+  const key = games.map((g) => g.appId).join(",");
+
+  useEffect(() => {
+    if (!games.length) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+    let active = true;
+    setLoading(true);
+    fetchSteamEvents({ data: { games: games.slice(0, 6) } })
+      .then((result) => {
+        if (active) setEvents(result.events);
+      })
+      .catch(() => {
+        if (active) setEvents([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  return { events, loading };
 }
 
 export function useDebouncedTerm(q: string) {
