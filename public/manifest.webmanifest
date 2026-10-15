@@ -1,0 +1,24 @@
+{
+  "name": "Steam Dealz",
+  "short_name": "Steam Dealz",
+  "description": "Live discounts from the official Steam Store, sorted by regional price.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#051c12",
+  "theme_color": "#051c12",
+  "icons": [
+    {
+      "src": "/favicon-steam-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

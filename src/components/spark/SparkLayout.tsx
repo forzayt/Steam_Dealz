@@ -2,14 +2,14 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   BarChart3,
   Bookmark,
+  Check,
   ChevronDown,
+  Download,
   ExternalLink,
   Gift,
   LayoutDashboard,
   LifeBuoy,
-  Maximize,
   Menu,
-  Minimize2,
   Moon,
   RefreshCw,
   Settings,
@@ -17,6 +17,11 @@ import {
   Tags,
   X,
 } from "lucide-react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "analytics";
 
@@ -37,7 +42,9 @@ export function SparkLayout({
   const [minimized] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
   const [hoverOpen, setHoverOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -47,6 +54,7 @@ export function SparkLayout({
     return false;
   });
   const profileRef = useRef<HTMLDivElement>(null);
+  const installRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSidebarEnter = () => {
@@ -80,25 +88,46 @@ export function SparkLayout({
     const onDoc = (e: MouseEvent) => {
       const t = e.target as Node;
       if (profileRef.current && !profileRef.current.contains(t)) setShowProfile(false);
+      if (installRef.current && !installRef.current.contains(t)) setShowInstall(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
   useEffect(() => {
-    const onFs = () => setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    const onInstalled = () => {
+      setInstalled(true);
+      setInstallPrompt(null);
+      setShowInstall(false);
+    };
+    window.addEventListener("beforeinstallprompt", onBeforeInstall);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
 
-  const toggleFullscreen = async () => {
+  const handleInstall = async () => {
+    if (!installPrompt) return;
     try {
-      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-      else await document.exitFullscreen();
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
     } catch {
       /* noop */
+    } finally {
+      setInstallPrompt(null);
+      setShowInstall(false);
     }
   };
+
+  const isIos = () =>
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   const go = (key: SparkNavKey, href: string) => {
     setMobileOpen(false);
@@ -248,9 +277,47 @@ export function SparkLayout({
           </div>
 
           <div className="navbar-actions">
-            <button className="navbar-action-btn" aria-label="Toggle fullscreen" type="button" onClick={toggleFullscreen}>
-              {isFullscreen ? <Minimize2 size={18} /> : <Maximize size={18} />}
-            </button>
+            <div className="relative" ref={installRef}>
+              <button
+                className="navbar-action-btn"
+                aria-label="Install shortcut"
+                title="Install shortcut"
+                type="button"
+                onClick={() => {
+                  setShowInstall((v) => !v);
+                  setShowProfile(false);
+                }}
+              >
+                {installed ? <Check size={18} /> : <Download size={18} />}
+              </button>
+              {showInstall ? (
+                <div className="spark-pop" style={{ top: "calc(100% + 10px)", right: 0, width: 280 }}>
+                  <div className="spark-pop-header">Install shortcut</div>
+                  <div className="px-4 pb-3 text-[0.8rem] font-semibold leading-6 text-[#6c7e75]">
+                    {installPrompt ? (
+                      <p className="m-0">Add Steam Dealz to your home screen for quick access to live deals.</p>
+                    ) : isIos() ? (
+                      <p className="m-0">
+                        Tap <strong>Share</strong> in Safari, then choose <strong>Add to Home Screen</strong>.
+                      </p>
+                    ) : (
+                      <p className="m-0">
+                        Open the browser menu and choose <strong>Install Steam Dealz…</strong> or{" "}
+                        <strong>Add to Home screen</strong>.
+                      </p>
+                    )}
+                  </div>
+                  {installPrompt ? (
+                    <div className="px-4 pb-4">
+                      <button className="btn-quick-action w-full justify-center" type="button" onClick={handleInstall}>
+                        <Download size={15} />
+                        <span>Install</span>
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
 
             <button
               className="navbar-action-btn"
