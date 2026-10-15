@@ -305,6 +305,11 @@
 .sidebar-profile-img { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; background: var(--brand-forest-medium); flex: none; }
 .sidebar-profile-name { font-size: 0.86rem; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sidebar-profile-email { font-size: 0.74rem; color: var(--text-sidebar-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-contribute-link {
+  display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;
+  font-size: 0.74rem; font-weight: 700; color: var(--brand-lime); text-decoration: none;
+}
+.sidebar-contribute-link:hover { color: #fff; text-decoration: underline; }
 
 .spark-minimized .sidebar-wrapper { padding: 2rem 0.75rem; align-items: center; }
 .spark-minimized .sidebar-brand span,

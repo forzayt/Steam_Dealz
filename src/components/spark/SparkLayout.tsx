@@ -3,6 +3,7 @@ import {
   Bookmark,
   ExternalLink,
   Gift,
+  Github,
   LayoutDashboard,
   LifeBuoy,
   Menu,
@@ -177,7 +178,7 @@ export function SparkLayout({
 
         <div className="sidebar-profile">
           <img
-            src="/avatar.png"
+            src="https://avatars.githubusercontent.com/u/127679210?v=4"
             alt="Administrator"
             className="sidebar-profile-img"
             onError={(e) => {
@@ -185,8 +186,16 @@ export function SparkLayout({
             }}
           />
           <div className="sidebar-profile-info min-w-0 flex-1">
-            <div className="sidebar-profile-name">Deal Hunter</div>
-            <div className="sidebar-profile-email">hunter@steamdealz.gg</div>
+            <div className="sidebar-profile-name">Developed by Forza</div>
+            <a
+              href="https://github.com/forzayt/Steam_Dealz"
+              target="_blank"
+              rel="noreferrer"
+              className="sidebar-contribute-link"
+            >
+              <Github size={13} />
+              <span>Contribute</span>
+            </a>
           </div>
         </div>
       </aside>
