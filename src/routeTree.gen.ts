@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as DealsRouteImport } from './routes/deals'
 import { Route as FreeOffersRouteImport } from './routes/free-offers'
+import { Route as TopSellersRouteImport } from './routes/top-sellers'
 import { Route as WatchListRouteImport } from './routes/watch-list'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const FreeOffersRoute = FreeOffersRouteImport.update({
   path: '/free-offers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TopSellersRoute = TopSellersRouteImport.update({
+  id: '/top-sellers',
+  path: '/top-sellers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchListRoute = WatchListRouteImport.update({
   id: '/watch-list',
   path: '/watch-list',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/changelog': typeof ChangelogRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
+  '/top-sellers': typeof TopSellersRoute
   '/watch-list': typeof WatchListRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/changelog': typeof ChangelogRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
+  '/top-sellers': typeof TopSellersRoute
   '/watch-list': typeof WatchListRoute
 }
 export interface FileRoutesById {
@@ -61,15 +69,34 @@ export interface FileRoutesById {
   '/changelog': typeof ChangelogRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
+  '/top-sellers': typeof TopSellersRoute
   '/watch-list': typeof WatchListRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/changelog' | '/deals' | '/free-offers' | '/watch-list'
+  fullPaths:
+    | '/'
+    | '/changelog'
+    | '/deals'
+    | '/free-offers'
+    | '/top-sellers'
+    | '/watch-list'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/changelog' | '/deals' | '/free-offers' | '/watch-list'
+  to:
+    | '/'
+    | '/changelog'
+    | '/deals'
+    | '/free-offers'
+    | '/top-sellers'
+    | '/watch-list'
   id:
-    '__root__' | '/' | '/changelog' | '/deals' | '/free-offers' | '/watch-list'
+    | '__root__'
+    | '/'
+    | '/changelog'
+    | '/deals'
+    | '/free-offers'
+    | '/top-sellers'
+    | '/watch-list'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +104,7 @@ export interface RootRouteChildren {
   ChangelogRoute: typeof ChangelogRoute
   DealsRoute: typeof DealsRoute
   FreeOffersRoute: typeof FreeOffersRoute
+  TopSellersRoute: typeof TopSellersRoute
   WatchListRoute: typeof WatchListRoute
 }
 
@@ -110,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FreeOffersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/top-sellers': {
+      id: '/top-sellers'
+      path: '/top-sellers'
+      fullPath: '/top-sellers'
+      preLoaderRoute: typeof TopSellersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watch-list': {
       id: '/watch-list'
       path: '/watch-list'
@@ -125,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChangelogRoute: ChangelogRoute,
   DealsRoute: DealsRoute,
   FreeOffersRoute: FreeOffersRoute,
+  TopSellersRoute: TopSellersRoute,
   WatchListRoute: WatchListRoute,
 }
 export const routeTree = rootRouteImport

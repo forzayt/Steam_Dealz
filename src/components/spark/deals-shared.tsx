@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, AlertCircle, Bookmark, ExternalLink, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { getSteamDeals, getSteamEvents, type SteamCountry, type SteamDeal, type SteamEvent } from "@/lib/steam-deals.functions";
+import { getSteamDeals, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
 import { useWatchlist } from "@/lib/watchlist";
 
 export const REGION_NAMES: Record<SteamCountry, string> = {
@@ -18,7 +18,11 @@ export const REGION_NAMES: Record<SteamCountry, string> = {
   TR: "Türkiye · TRY",
 };
 
-export function useSteamDeals(country: SteamCountry, activeTerm: string) {
+export function useSteamDeals(
+  country: SteamCountry,
+  activeTerm: string,
+  listing: "specials" | "topsellers" = "specials",
+) {
   const fetchSteamDeals = useServerFn(getSteamDeals);
   const [games, setGames] = useState<SteamDeal[]>([]);
   const [nextStart, setNextStart] = useState(0);
@@ -37,7 +41,7 @@ export function useSteamDeals(country: SteamCountry, activeTerm: string) {
     setNextStart(0);
     setHasMore(false);
     setTotalCount(0);
-    fetchSteamDeals({ data: { country, start: 0, term: activeTerm } })
+    fetchSteamDeals({ data: { country, start: 0, term: activeTerm, listing } })
       .then((result) => {
         if (!active) return;
         setGames(result.games);
@@ -60,13 +64,13 @@ export function useSteamDeals(country: SteamCountry, activeTerm: string) {
     return () => {
       active = false;
     };
-  }, [country, activeTerm, fetchSteamDeals]);
+  }, [country, activeTerm, listing, fetchSteamDeals]);
 
   const refresh = async () => {
     setLoading(true);
     setError("");
     try {
-      const result = await fetchSteamDeals({ data: { country, start: 0, refresh: true, term: activeTerm } });
+      const result = await fetchSteamDeals({ data: { country, start: 0, refresh: true, term: activeTerm, listing } });
       setGames(result.games);
       setNextStart(result.nextStart);
       setHasMore(result.hasMore);
@@ -83,11 +87,11 @@ export function useSteamDeals(country: SteamCountry, activeTerm: string) {
     setLoadingMore(true);
     setError("");
     try {
-      const result = await fetchSteamDeals({ data: { country, start: nextStart, term: activeTerm } });
+      const result = await fetchSteamDeals({ data: { country, start: nextStart, term: activeTerm, listing } });
       setGames((current) => {
         const seen = new Set(current.map((g) => g.appId));
         const fresh = result.games.filter((g) => !seen.has(g.appId));
-        if (activeTerm) return [...current, ...fresh];
+        if (activeTerm || listing !== "specials") return [...current, ...fresh];
         return [...current, ...fresh].sort(
           (a, b) => Number(a.isFree) - Number(b.isFree) || a.currentPriceAmount - b.currentPriceAmount,
         );
@@ -107,39 +111,6 @@ export function useSteamDeals(country: SteamCountry, activeTerm: string) {
   const freeOffers = useMemo(() => games.filter((g) => g.isFree), [games]);
 
   return { games, paidDeals, freeOffers, nextStart, hasMore, totalCount, loading, loadingMore, error, setError, lastUpdated, refresh, loadMore };
-}
-
-export function useSteamEvents(games: { appId: string; title: string }[]) {
-  const fetchSteamEvents = useServerFn(getSteamEvents);
-  const [events, setEvents] = useState<SteamEvent[]>([]);
-  const [loading, setLoading] = useState(false);
-  const key = games.map((g) => g.appId).join(",");
-
-  useEffect(() => {
-    if (!games.length) {
-      setEvents([]);
-      setLoading(false);
-      return;
-    }
-    let active = true;
-    setLoading(true);
-    fetchSteamEvents({ data: { games: games.slice(0, 6) } })
-      .then((result) => {
-        if (active) setEvents(result.events);
-      })
-      .catch(() => {
-        if (active) setEvents([]);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
-
-  return { events, loading };
 }
 
 export function useDebouncedTerm(q: string) {
@@ -213,7 +184,7 @@ export function WatchButton({ game, overlay }: { game: SteamDeal; overlay?: bool
   );
 }
 
-export function DealCard({ game }: { game: SteamDeal }) {
+export function DealCard({ game, rank }: { game: SteamDeal; rank?: number }) {
   const portrait = portraitUrl(game);
   const [src, setSrc] = useState(portrait);
   useEffect(() => {
@@ -240,6 +211,7 @@ export function DealCard({ game }: { game: SteamDeal }) {
         </a>
         {game.discountPercent > 0 ? <span className="deal-discount">-{game.discountPercent}%</span> : null}
         {game.isFree ? <span className="deal-free">FREE</span> : null}
+        {typeof rank === "number" ? <span className="deal-rank">#{rank}</span> : null}
       </div>
       <div className="deal-card-body">
         <div className="deal-card-top">

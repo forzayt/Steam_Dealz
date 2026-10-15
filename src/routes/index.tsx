@@ -18,7 +18,6 @@ import {
   REGION_NAMES,
   useDebouncedTerm,
   useSteamDeals,
-  useSteamEvents,
 } from "@/components/spark/deals-shared";
 import { STEAM_COUNTRIES, type SteamCountry } from "@/lib/steam-deals.functions";
 
@@ -64,6 +63,55 @@ function TickerArt({ appId, fallback, artKey }: { appId: string; fallback: strin
   );
 }
 
+function saleRange(start: string, end: string): string {
+  const s = new Date(`${start}T00:00:00`);
+  const e = new Date(`${end}T00:00:00`);
+  if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
+    return `${s.toLocaleDateString([], { month: "short" })} ${s.getDate()} – ${e.getDate()}`;
+  }
+  return `${s.toLocaleDateString([], { month: "short", day: "numeric" })} – ${e.toLocaleDateString([], { month: "short", day: "numeric" })}`;
+}
+
+/** Major Steam sales from Valve's official schedule (seasonal + fests). */
+const SALE_EVENTS = [
+  {
+    name: "Cooking Fest",
+    short: "Cooking Fest",
+    start: "2026-10-12",
+    end: "2026-10-19",
+    url: "https://store.steampowered.com/specials/",
+    blurb: "Cooking, farming and food games on sale across Steam.",
+    gradient: "linear-gradient(135deg, #f97316, #7c2d12)",
+  },
+  {
+    name: "Steam Next Fest: October 2026",
+    short: "Next Fest",
+    start: "2026-10-19",
+    end: "2026-10-26",
+    url: "https://store.steampowered.com/specials/",
+    blurb: "Hundreds of free demos to try before they launch.",
+    gradient: "linear-gradient(135deg, #1b78e4, #0b1e3a)",
+  },
+  {
+    name: "Steam Scream V Fest",
+    short: "Scream V",
+    start: "2026-10-26",
+    end: "2026-11-02",
+    url: "https://store.steampowered.com/specials/",
+    blurb: "Horror, spooky and scary games take over Steam.",
+    gradient: "linear-gradient(135deg, #7c3aed, #12081f)",
+  },
+  {
+    name: "Steam Winter Sale 2026",
+    short: "Winter Sale",
+    start: "2026-12-17",
+    end: "2027-01-04",
+    url: "https://steamcommunity.com/groups/steamworks/announcements/detail/493837645658461608",
+    blurb: "The biggest seasonal sale of the year.",
+    gradient: "linear-gradient(135deg, #38bdf8, #1e3a8a)",
+  },
+];
+
 function SteamDealsPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/" });
@@ -87,25 +135,17 @@ function SteamDealsPage() {
   const sparkA = useMemo(() => paidDeals.slice(0, 12).map((g) => g.discountPercent), [paidDeals]);
   const sparkB = useMemo(() => [...paidDeals].slice(0, 12).map((g) => 100 - g.discountPercent), [paidDeals]);
 
-  const topEventGames = useMemo(
-    () =>
-      [...paidDeals]
-        .sort((a, b) => b.discountPercent - a.discountPercent)
-        .slice(0, 6)
-        .map((g) => ({ appId: g.appId, title: g.title })),
-    [paidDeals],
-  );
-  const { events, loading: eventsLoading } = useSteamEvents(topEventGames);
-  const [eventIdx, setEventIdx] = useState(0);
-  useEffect(() => {
-    setEventIdx(0);
-  }, [country, activeTerm]);
-  useEffect(() => {
-    if (events.length < 2) return;
-    const t = setInterval(() => setEventIdx((i) => (i + 1) % events.length), 3500);
-    return () => clearInterval(t);
-  }, [events.length]);
-  const event = events.length ? events[eventIdx % events.length] : undefined;
+  const saleEvents = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return SALE_EVENTS.map((s) => {
+      const start = new Date(`${s.start}T00:00:00`);
+      const end = new Date(`${s.end}T00:00:00`);
+      return { ...s, live: start <= now && now <= end, upcoming: now < start };
+    })
+      .filter((s) => s.live || s.upcoming)
+      .sort((a, b) => Number(b.live) - Number(a.live) || a.start.localeCompare(b.start));
+  }, []);
 
   const [freeIdx, setFreeIdx] = useState(0);
   useEffect(() => {
@@ -136,7 +176,7 @@ function SteamDealsPage() {
       document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog", search: { q } });
+    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog" | "/top-sellers", search: { q } });
   };
 
   const maxForBar = Math.max(games.length, 1);
@@ -281,48 +321,45 @@ function SteamDealsPage() {
       {/* Main grid — dashboard only, full lists live on /deals and /free-offers */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col gap-6">
-          <div className={`card alert-green-card mb-0${!eventsLoading && event ? " alert-green-clickable" : ""}`} id="events">
-            <div className="alert-green-art" aria-hidden="true">
-              {event ? (
-                <TickerArt appId={event.appId} fallback={event.coverUrl} artKey={`${event.appId}-${eventIdx}`} />
-              ) : null}
+          <div className="card mb-0" id="events">
+            <div className="card-header mb-2">
+              <h2 className="card-title">Steam Sale Events</h2>
+              <span className="trend-badge trend-up text-xs">
+                {saleEvents.some((s) => s.live) ? "sale live now" : "upcoming"}
+              </span>
             </div>
-            <div className="alert-green-shade" aria-hidden="true" />
-            <div className="relative z-[2]">
-              <span className="alert-green-badge">Events</span>
-              <div className="alert-green-date">
-                {REGION_NAMES[country]}
-                {events.length > 1 ? ` · ${Math.min(eventIdx + 1, events.length)} / ${events.length}` : null}
+            {saleEvents.length ? (
+              <div className="sale-grid">
+                {saleEvents.map((s) => (
+                  <a key={s.name} href={s.url} target="_blank" rel="noreferrer" className="sale-tile">
+                    <span className="sale-banner" style={{ background: s.gradient }}>
+                      {s.live ? <span className="sale-live">Live</span> : null}
+                      <span className="sale-banner-name">{s.short}</span>
+                      <span className="sale-banner-dates">{saleRange(s.start, s.end)}</span>
+                    </span>
+                    <span className="sale-title">{s.name}</span>
+                    <span className="sale-desc">{s.blurb}</span>
+                  </a>
+                ))}
               </div>
-              {eventsLoading ? (
-                <div className="alert-green-text">Loading Steam events…</div>
-              ) : event ? (
-                <div key={`${event.appId}-${eventIdx}`} className="alert-green-text alert-green-ticker">
-                  {event.gameTitle} — {event.title}
-                </div>
-              ) : (
-                <div className="alert-green-text">No Steam events right now</div>
-              )}
-            </div>
-            {eventsLoading || !event ? (
-              <span className="alert-green-link z-[2]">
-                <span>{eventsLoading ? "Fetching live announcements…" : "Check back soon"}</span>
-              </span>
             ) : (
-              <span key={`event-link-${event.appId}-${eventIdx}`} className="alert-green-link z-[2]">
-                <span>Read event</span>
-                <ArrowRight size={15} />
-              </span>
+              <p className="text-sm font-semibold text-[#6c7e75]">
+                No dated sales on the calendar — fresh Steam dates land here as Valve announces them.
+              </p>
             )}
-            {!eventsLoading && event ? (
+            <div className="sale-foot">
+              <a href="/deals" className="alert-green-link" style={{ color: "#072f1f" }}>
+                <span>Browse all deals</span> <ArrowRight size={15} />
+              </a>
               <a
-                href={event.url}
+                href="https://store.steampowered.com/specials/"
                 target="_blank"
                 rel="noreferrer"
-                className="alert-green-stretch"
-                aria-label={`Read Steam event: ${event.title}`}
-              />
-            ) : null}
+                className="sale-all"
+              >
+                View all sale events…
+              </a>
+            </div>
           </div>
 
           <div className="card mb-0">

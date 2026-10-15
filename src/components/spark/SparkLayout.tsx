@@ -9,10 +9,11 @@ import {
   Moon,
   Sun,
   Tags,
+  Trophy,
   X,
 } from "lucide-react";
 
-export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "changelog" | "analytics";
+export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "changelog" | "topsellers" | "analytics";
 
 export function SparkLayout({
   children,
@@ -139,6 +140,7 @@ export function SparkLayout({
             <ul className="sidebar-menu-list">
               {navItem("deals", "/deals", <Tags size={19} />, "Discounted Games")}
               {navItem("free", "/free-offers", <Gift size={19} />, "Free Offers")}
+              {navItem("topsellers", "/top-sellers", <Trophy size={19} />, "Top Sellers")}
               {navItem("watchlist", "/watch-list", <Bookmark size={19} />, "Watch List")}
             </ul>
           </div>

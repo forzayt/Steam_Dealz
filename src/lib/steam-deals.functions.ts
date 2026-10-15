@@ -128,16 +128,21 @@ function parseDeals(html: string, requireDiscount = true): SteamDeal[] {
   });
 }
 
-async function getSteamPage(country: SteamCountry, start: number, term = "") {
+async function getSteamPage(
+  country: SteamCountry,
+  start: number,
+  term = "",
+  listing: "specials" | "topsellers" = "specials",
+) {
   const termKey = term.trim().toLocaleLowerCase().slice(0, 100);
-  const key = `${country}:${termKey}:${start}`;
+  const key = `${country}:${listing}:${termKey}:${start}`;
   const cached = pageCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached;
 
   const params = new URLSearchParams({
     start: String(start),
     count: String(PAGE_SIZE),
-    sort_by: termKey ? "_ASC" : "Price_ASC",
+    sort_by: termKey ? "_ASC" : listing === "topsellers" ? "_ASC" : "Price_ASC",
     cc: country,
     l: "english",
     supportedlang: "english",
@@ -147,6 +152,9 @@ async function getSteamPage(country: SteamCountry, start: number, term = "") {
   });
   if (termKey) {
     params.set("term", term.trim().slice(0, 100));
+  } else if (listing === "topsellers") {
+    params.set("query", "");
+    params.set("filter", "topsellers");
   } else {
     params.set("query", "");
     params.set("specials", "1");
@@ -166,7 +174,7 @@ async function getSteamPage(country: SteamCountry, start: number, term = "") {
 
   const value = {
     expiresAt: Date.now() + CACHE_TTL_MS,
-    deals: parseDeals(data.results_html, !termKey),
+    deals: parseDeals(data.results_html, !termKey && listing === "specials"),
     totalCount: Number.isFinite(data.total_count) ? Number(data.total_count) : 0,
   };
   if (pageCache.size >= 36) {
@@ -182,6 +190,7 @@ const inputSchema = z.object({
   start: z.number().int().min(0).max(10_000).multipleOf(PAGE_SIZE),
   refresh: z.boolean().optional(),
   term: z.string().trim().max(100).optional().default(""),
+  listing: z.enum(["specials", "topsellers"]).optional().default("specials"),
 });
 
 export const getSteamDeals = createServerFn({ method: "GET" })
@@ -189,26 +198,28 @@ export const getSteamDeals = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<SteamDealsResult> => {
     const term = (data.term ?? "").trim().slice(0, 100);
     const termKey = term.toLocaleLowerCase();
+    const listing = data.listing ?? "specials";
     if (data.refresh) {
       for (const key of [...pageCache.keys()]) {
         if (!key.startsWith(`${data.country}:`)) continue;
-        if (!termKey || key === `${data.country}:${termKey}:${data.start}` || key.startsWith(`${data.country}:${termKey}:`)) {
+        if (!termKey || key.includes(`:${termKey}:`)) {
           pageCache.delete(key);
         }
       }
     }
     const starts = termKey ? [data.start] : data.start === 0 ? [0, PAGE_SIZE, PAGE_SIZE * 2] : [data.start];
-    const pages = await Promise.all(starts.map((start) => getSteamPage(data.country, start, term)));
+    const pages = await Promise.all(starts.map((start) => getSteamPage(data.country, start, term, listing)));
     const uniqueDeals = new Map<string, SteamDeal>();
     for (const page of pages) {
       for (const deal of page.deals) uniqueDeals.set(deal.appId, deal);
     }
     const unordered = [...uniqueDeals.values()];
-    const games = termKey
-      ? unordered
-      : unordered.sort(
-          (first, second) => first.currentPriceAmount - second.currentPriceAmount || first.title.localeCompare(second.title),
-        );
+    const games =
+      termKey || listing !== "specials"
+        ? unordered
+        : unordered.sort(
+            (first, second) => first.currentPriceAmount - second.currentPriceAmount || first.title.localeCompare(second.title),
+          );
     const totalCount = pages[0]?.totalCount ?? 0;
     const nextStart = data.start + starts.length * PAGE_SIZE;
 
