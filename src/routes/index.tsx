@@ -5,7 +5,6 @@ import {
   ExternalLink,
   Flame,
   MoreHorizontal,
-  RefreshCw,
   Search,
   TrendingDown,
   TrendingUp,
@@ -175,10 +174,6 @@ function SteamDealsPage() {
               ))}
             </select>
           </label>
-          <button className="btn-quick-action" type="button" onClick={() => void refresh()} disabled={loading}>
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span>Refresh</span>
-          </button>
         </div>
       </div>
 
@@ -202,7 +197,7 @@ function SteamDealsPage() {
 
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="card alert-green-card">
+        <div className={`card alert-green-card${!loading && freeGame ? " alert-green-clickable" : ""}`}>
           <div className="alert-green-art" aria-hidden="true">
             {freeGame ? (
               <TickerArt appId={freeGame.appId} fallback={freeGame.coverUrl} artKey={`${freeGame.appId}-${freeIdx}`} />
@@ -230,22 +225,25 @@ function SteamDealsPage() {
               <span>Loading live prices…</span>
             </span>
           ) : freeGame ? (
-            <a
-              key={`link-${freeGame.appId}-${freeIdx}`}
-              href={freeGame.storeUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="alert-green-link z-[2]"
-            >
+            <span key={`link-${freeGame.appId}-${freeIdx}`} className="alert-green-link z-[2]">
               <span>Claim free · {freeGame.currentPrice}</span>
               <ArrowRight size={15} />
-            </a>
+            </span>
           ) : (
             <a href="/free-offers" className="alert-green-link z-[2]">
               <span>Check free offers</span>
               <ArrowRight size={15} />
             </a>
           )}
+          {!loading && freeGame ? (
+            <a
+              href={freeGame.storeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="alert-green-stretch"
+              aria-label={`Claim ${freeGame.title} free on Steam`}
+            />
+          ) : null}
         </div>
 
         <div className="card">

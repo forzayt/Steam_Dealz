@@ -544,6 +544,9 @@
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background: linear-gradient(180deg, rgba(5, 28, 18, 0.55) 0%, rgba(5, 28, 18, 0.9) 100%);
 }
+.alert-green-clickable { cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+.alert-green-clickable:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.alert-green-stretch { position: absolute; inset: 0; z-index: 3; }
 .alert-green-link { color: var(--brand-lime); font-size: 0.86rem; font-weight: 650; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: auto; background: none; border: 0; cursor: pointer; padding: 0; text-decoration: none; }
 .alert-green-link:hover { color: #fff; }
 .alert-green-bg-shape { position: absolute; bottom: -24px; right: -24px; width: 132px; height: 132px; opacity: 0.95; pointer-events: none; }

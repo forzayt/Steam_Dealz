@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, LoaderCircle, RefreshCw, Search } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, LoaderCircle, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
 import { DealCard, DealCardSkeleton, EmptyState, REGION_NAMES, useDebouncedTerm, useSteamDeals } from "@/components/spark/deals-shared";
@@ -27,8 +27,14 @@ function DealsPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/deals" });
   const [country, setCountry] = useState<SteamCountry>("IN");
+  const [minDiscount, setMinDiscount] = useState(0);
   const { trimmedQuery, activeTerm, isSearching } = useDebouncedTerm(q);
   const { paidDeals, totalCount, loading, loadingMore, error, refresh, loadMore, hasMore } = useSteamDeals(country, activeTerm);
+
+  const visibleDeals = useMemo(
+    () => paidDeals.filter((g) => g.discountPercent >= minDiscount),
+    [paidDeals, minDiscount],
+  );
 
   const updateSearch = (value: string) => {
     void navigate({ search: (prev) => ({ ...prev, q: value }), replace: true });
@@ -75,10 +81,21 @@ function DealsPage() {
               ))}
             </select>
           </label>
-          <button className="btn-quick-action" type="button" onClick={() => void refresh()} disabled={loading}>
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span>Refresh</span>
-          </button>
+          <label className="flex items-center gap-2 text-[0.8rem] font-bold text-[#6c7e75]">
+            <span className="hidden sm:inline">Min. off</span>
+            <select
+              aria-label="Minimum discount percentage"
+              className="region-select"
+              value={minDiscount}
+              onChange={(e) => setMinDiscount(Number(e.currentTarget.value))}
+            >
+              <option value={0}>Any %</option>
+              <option value={25}>25%+</option>
+              <option value={50}>50%+</option>
+              <option value={75}>75%+</option>
+              <option value={90}>90%+</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -124,13 +141,9 @@ function DealsPage() {
           <div>
             <h2 className="card-title">{activeTerm ? `Results for “${activeTerm}”` : "All Discounted Games"}</h2>
             <p className="mt-1 text-xs font-semibold text-[#6c7e75]">
-              {paidDeals.length} shown · {REGION_NAMES[country]}
+              {visibleDeals.length} shown · {minDiscount > 0 ? `${minDiscount}%+ off · ` : ""}{REGION_NAMES[country]}
             </p>
           </div>
-          <button className="btn-date-picker" type="button" onClick={() => void refresh()} disabled={loading}>
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span className="hidden sm:inline">Sync</span>
-          </button>
         </div>
 
         {loading ? (
@@ -139,9 +152,9 @@ function DealsPage() {
               <DealCardSkeleton key={i} />
             ))}
           </div>
-        ) : paidDeals.length ? (
+        ) : visibleDeals.length ? (
           <div className="deal-grid">
-            {paidDeals.map((g) => (
+            {visibleDeals.map((g) => (
               <DealCard key={g.appId} game={g} />
             ))}
           </div>

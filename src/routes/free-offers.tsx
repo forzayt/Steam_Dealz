@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AlertCircle, Gift, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, Gift, Search } from "lucide-react";
 import { useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
@@ -73,10 +73,6 @@ function FreeOffersPage() {
               ))}
             </select>
           </label>
-          <button className="btn-quick-action" type="button" onClick={() => void refresh()} disabled={loading}>
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            <span>Refresh</span>
-          </button>
         </div>
       </div>
 
