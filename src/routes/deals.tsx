@@ -27,7 +27,7 @@ function DealsPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/deals" });
   const [country, setCountry] = useState<SteamCountry>("IN");
-  const [minDiscount, setMinDiscount] = useState(0);
+  const [minDiscount, setMinDiscount] = useState(1);
   const { trimmedQuery, activeTerm, isSearching } = useDebouncedTerm(q);
   const { paidDeals, totalCount, loading, loadingMore, error, refresh, loadMore, hasMore } = useSteamDeals(country, activeTerm);
 
@@ -73,27 +73,27 @@ function DealsPage() {
           </p>
         </div>
         <div className="page-header-actions">
+          <label className="discount-slider">
+            <span>
+              Min. off <strong>{minDiscount}%</strong>
+            </span>
+            <input
+              type="range"
+              min={1}
+              max={100}
+              step={1}
+              value={minDiscount}
+              onChange={(e) => setMinDiscount(Number(e.currentTarget.value))}
+              aria-label="Minimum discount percentage"
+              aria-valuetext={`${minDiscount} percent off or more`}
+            />
+          </label>
           <label className="flex items-center gap-2 text-[0.8rem] font-bold text-[#6c7e75]">
             <span className="hidden sm:inline">Store region</span>
             <select aria-label="Store region" className="region-select" value={country} onChange={(e) => setCountry(e.currentTarget.value as SteamCountry)}>
               {STEAM_COUNTRIES.map((r) => (
                 <option key={r} value={r}>{REGION_NAMES[r]}</option>
               ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2 text-[0.8rem] font-bold text-[#6c7e75]">
-            <span className="hidden sm:inline">Min. off</span>
-            <select
-              aria-label="Minimum discount percentage"
-              className="region-select"
-              value={minDiscount}
-              onChange={(e) => setMinDiscount(Number(e.currentTarget.value))}
-            >
-              <option value={0}>Any %</option>
-              <option value={25}>25%+</option>
-              <option value={50}>50%+</option>
-              <option value={75}>75%+</option>
-              <option value={90}>90%+</option>
             </select>
           </label>
         </div>
@@ -141,7 +141,7 @@ function DealsPage() {
           <div>
             <h2 className="card-title">{activeTerm ? `Results for “${activeTerm}”` : "All Discounted Games"}</h2>
             <p className="mt-1 text-xs font-semibold text-[#6c7e75]">
-              {visibleDeals.length} shown · {minDiscount > 0 ? `${minDiscount}%+ off · ` : ""}{REGION_NAMES[country]}
+              {visibleDeals.length} shown · {minDiscount > 1 ? `${minDiscount}%+ off · ` : ""}{REGION_NAMES[country]}
             </p>
           </div>
         </div>
