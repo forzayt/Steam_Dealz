@@ -616,13 +616,7 @@
   top: 0.55rem;
   right: 0.55rem;
   z-index: 2;
-  background: rgba(5, 28, 18, 0.55);
-  color: #fff;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
 }
-.deal-card-watch--over:hover { background: rgba(5, 28, 18, 0.85); color: #fff; }
-.deal-card-watch--over.active { background: var(--brand-lime); color: var(--brand-forest-dark); }
 .deal-card-body {
   display: flex;
   flex-direction: column;
@@ -666,9 +660,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 8px;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 10px;
   border: 0;
   background: transparent;
   color: var(--text-muted-green);

@@ -166,7 +166,7 @@ export function WatchButton({ game, overlay }: { game: SteamDeal; overlay?: bool
       title={watched ? "Remove from watch list" : "Add to watch list"}
       onClick={() => toggle(game)}
     >
-      <Bookmark size={15} fill={watched ? "currentColor" : "none"} />
+      <Bookmark size={20} fill={watched ? "currentColor" : "none"} />
     </button>
   );
 }
@@ -198,7 +198,6 @@ export function DealCard({ game }: { game: SteamDeal }) {
         </a>
         {game.discountPercent > 0 ? <span className="deal-discount">-{game.discountPercent}%</span> : null}
         {game.isFree ? <span className="deal-free">FREE</span> : null}
-        <WatchButton game={game} overlay />
       </div>
       <div className="deal-card-body">
         <div className="deal-card-top">
@@ -207,6 +206,7 @@ export function DealCard({ game }: { game: SteamDeal }) {
               {game.title}
             </a>
           </h3>
+          <WatchButton game={game} />
         </div>
         <p className="deal-card-meta">
           {game.discountPercent > 0 ? (
