@@ -49,7 +49,7 @@ function WatchListPage() {
       document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list", search: { q } });
+    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog", search: { q } });
   };
 
   return (

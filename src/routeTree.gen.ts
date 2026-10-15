@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as DealsRouteImport } from './routes/deals'
 import { Route as FreeOffersRouteImport } from './routes/free-offers'
 import { Route as WatchListRouteImport } from './routes/watch-list'
@@ -17,6 +18,11 @@ import { Route as WatchListRouteImport } from './routes/watch-list'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DealsRoute = DealsRouteImport.update({
@@ -37,12 +43,14 @@ const WatchListRoute = WatchListRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
   '/watch-list': typeof WatchListRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
   '/watch-list': typeof WatchListRoute
@@ -50,20 +58,23 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
   '/watch-list': typeof WatchListRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/deals' | '/free-offers' | '/watch-list'
+  fullPaths: '/' | '/changelog' | '/deals' | '/free-offers' | '/watch-list'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/deals' | '/free-offers' | '/watch-list'
-  id: '__root__' | '/' | '/deals' | '/free-offers' | '/watch-list'
+  to: '/' | '/changelog' | '/deals' | '/free-offers' | '/watch-list'
+  id:
+    '__root__' | '/' | '/changelog' | '/deals' | '/free-offers' | '/watch-list'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChangelogRoute: typeof ChangelogRoute
   DealsRoute: typeof DealsRoute
   FreeOffersRoute: typeof FreeOffersRoute
   WatchListRoute: typeof WatchListRoute
@@ -76,6 +87,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/deals': {
@@ -104,6 +122,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChangelogRoute: ChangelogRoute,
   DealsRoute: DealsRoute,
   FreeOffersRoute: FreeOffersRoute,
   WatchListRoute: WatchListRoute,

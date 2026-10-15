@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bookmark,
-  ExternalLink,
   Gift,
   Github,
+  History,
   LayoutDashboard,
-  LifeBuoy,
   Menu,
   Moon,
-  Settings,
   Sun,
   Tags,
   X,
 } from "lucide-react";
 
-export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "analytics";
+export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "changelog" | "analytics";
 
 export function SparkLayout({
   children,
@@ -148,30 +146,7 @@ export function SparkLayout({
           <div className="sidebar-menu-section">
             <div className="sidebar-menu-title">Pages</div>
             <ul className="sidebar-menu-list">
-              <li>
-                <a
-                  href="https://store.steampowered.com/specials/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="sidebar-menu-link"
-                  title="Official Steam Specials"
-                >
-                  <ExternalLink size={19} />
-                  <span>Steam Specials</span>
-                </a>
-              </li>
-              <li>
-                <button type="button" className="sidebar-menu-link" title="Store region" onClick={() => go("deals", "#region")}>
-                  <Settings size={19} />
-                  <span>Store Region</span>
-                </button>
-              </li>
-              <li>
-                <a href="#about" onClick={(e) => { e.preventDefault(); go("dashboard", "#about"); }} className="sidebar-menu-link" title="Help">
-                  <LifeBuoy size={19} />
-                  <span>Help & Docs</span>
-                </a>
-              </li>
+              {navItem("changelog", "/changelog", <History size={19} />, "Change Log")}
             </ul>
           </div>
         </div>

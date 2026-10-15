@@ -811,6 +811,39 @@
 .badge-table.pending { background: rgba(249,115,22,0.12); color: #c2410c; }
 .badge-table.free { background: var(--brand-forest-medium); color: #fff; }
 
+/* Contributors + commits (change log) */
+.contrib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.9rem; }
+.contrib-card {
+  display: flex; align-items: center; gap: 0.8rem; min-width: 0;
+  background: #fff; border: 1px solid rgba(11,19,15,0.06); border-radius: var(--radius-xl);
+  padding: 0.85rem 1rem; text-decoration: none; color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.contrib-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: rgba(7,47,31,0.16); }
+.contrib-avatar { width: 44px; height: 44px; border-radius: 50rem; object-fit: cover; flex: none; background: var(--muted); }
+.contrib-name { font-size: 0.87rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contrib-commits { font-size: 0.74rem; font-weight: 600; color: var(--text-muted-green); }
+.commit-list { display: flex; flex-direction: column; }
+.commit-row {
+  display: flex; align-items: flex-start; gap: 0.8rem; min-width: 0;
+  padding: 0.8rem 0.2rem; border-bottom: 1px solid rgba(11,19,15,0.06);
+  text-decoration: none; color: inherit; border-radius: 8px;
+}
+.commit-row:last-child { border-bottom: 0; }
+.commit-row:hover { background: var(--background); }
+.commit-avatar { width: 32px; height: 32px; border-radius: 50rem; object-fit: cover; flex: none; background: var(--muted); }
+.commit-avatar--fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--brand-forest-medium); background: rgba(180,241,5,0.25); }
+.commit-message { display: block; font-size: 0.86rem; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.commit-meta { display: block; margin-top: 0.15rem; font-size: 0.74rem; font-weight: 600; color: var(--text-muted-green); }
+.commit-open { flex: none; margin-top: 0.2rem; color: var(--text-muted-green); }
+.commit-row:hover .commit-open { color: var(--brand-forest-medium); }
+.dark .contrib-card { background: #131a17; border-color: rgba(255,255,255,0.08); }
+.dark .contrib-card:hover { border-color: rgba(180,241,5,0.35); }
+.dark .commit-row { border-bottom-color: rgba(255,255,255,0.08); }
+.dark .commit-row:hover { background: #182019; }
+.dark .commit-row:hover .commit-open { color: var(--brand-lime); }
+.dark .commit-avatar--fallback { color: var(--brand-lime); background: rgba(180,241,5,0.12); }
+
 /* Dark mode component overrides (hardcoded light surfaces) */
 .dark .navbar-custom { background-color: rgba(10, 14, 13, 0.88); border-bottom-color: rgba(255, 255, 255, 0.08); }
 .dark .navbar-brand { color: #fff; }
