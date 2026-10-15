@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight,
   BarChart3,
   Bell,
   ChevronDown,
@@ -11,9 +10,7 @@ import {
   Maximize,
   Menu,
   Minimize2,
-  Plus,
   RefreshCw,
-  Search,
   Settings,
   Tags,
   X,
@@ -23,9 +20,6 @@ export type SparkNavKey = "dashboard" | "deals" | "free" | "analytics";
 
 export function SparkLayout({
   children,
-  searchValue,
-  onSearchChange,
-  searching,
   onRefresh,
   refreshing,
   notifications,
@@ -33,25 +27,20 @@ export function SparkLayout({
   onNav,
 }: {
   children: ReactNode;
-  searchValue: string;
-  onSearchChange: (v: string) => void;
-  searching?: boolean;
   onRefresh: () => void;
   refreshing?: boolean;
   notifications: { title: string; meta: string; discount: number }[];
   activeNav?: SparkNavKey;
   onNav?: (key: SparkNavKey, href: string) => void;
 }) {
-  const [minimized, setMinimized] = useState(false);
+  const [minimized] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [showCreate, setShowCreate] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hoverOpen, setHoverOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const createRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSidebarEnter = () => {
@@ -77,7 +66,6 @@ export function SparkLayout({
       const t = e.target as Node;
       if (notifRef.current && !notifRef.current.contains(t)) setShowNotif(false);
       if (profileRef.current && !profileRef.current.contains(t)) setShowProfile(false);
-      if (createRef.current && !createRef.current.contains(t)) setShowCreate(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -227,69 +215,9 @@ export function SparkLayout({
       <div className="main-wrapper" id="top">
         <header className="navbar-custom">
           <div className="navbar-left">
-            <button
-              className="btn-desktop-toggle"
-              onClick={() => setMinimized((v) => !v)}
-              aria-label="Minimize sidebar"
-              type="button"
-            >
-              {minimized ? <Minimize2 size={18} /> : <Menu size={18} />}
-            </button>
             <button className="sidebar-toggle-btn" onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle navigation" type="button">
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
-
-            <div className="relative" ref={createRef}>
-              <button className="btn-quick-action" type="button" onClick={() => setShowCreate((v) => !v)}>
-                <Plus size={15} strokeWidth={3} />
-                <span>Create</span>
-                <ChevronDown size={14} />
-              </button>
-              {showCreate ? (
-                <div className="spark-pop" style={{ top: "calc(100% + 8px)", left: 0, width: 230 }}>
-                  <div className="spark-pop-header">Quick actions</div>
-                  <button
-                    className="spark-pop-item"
-                    type="button"
-                    onClick={() => {
-                      setShowCreate(false);
-                      onRefresh();
-                    }}
-                  >
-                    <RefreshCw size={16} /> Refresh deals
-                  </button>
-                  <a className="spark-pop-item" href="/deals" onClick={() => setShowCreate(false)}>
-                    <Tags size={16} /> Browse discounts
-                  </a>
-                  <a
-                    className="spark-pop-item"
-                    href="https://store.steampowered.com/specials/"
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => setShowCreate(false)}
-                  >
-                    <ExternalLink size={16} /> Steam Specials <ArrowUpRight size={13} />
-                  </a>
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="navbar-search-wrapper">
-            <input
-              type="search"
-              className="navbar-search-input"
-              placeholder="Search anything — try “elden ring”"
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.currentTarget.value)}
-              aria-label="Search Steam games"
-            />
-            <span className="navbar-search-btn" aria-hidden="true">
-              <Search size={17} />
-            </span>
-            {searching ? (
-              <span className="absolute right-10 top-1/2 -translate-y-1/2 text-xs font-bold text-[#6c7e75]">…</span>
-            ) : null}
           </div>
 
           <div className="navbar-actions">

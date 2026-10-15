@@ -122,9 +122,6 @@ function SteamDealsPage() {
 
   return (
     <SparkLayout
-      searchValue={q}
-      onSearchChange={updateSearch}
-      searching={isSearching || loading}
       onRefresh={() => void refresh()}
       refreshing={loading}
       notifications={notifItems}
@@ -162,6 +159,27 @@ function SteamDealsPage() {
             <span>Refresh</span>
           </button>
         </div>
+      </div>
+
+      <div className="page-search-wrapper">
+        <span className="page-search-icon" aria-hidden="true">
+          <Search size={17} />
+        </span>
+        <input
+          type="search"
+          className="page-search-input"
+          placeholder="Search Steam games — try “elden ring”"
+          value={q}
+          onChange={(e) => updateSearch(e.currentTarget.value)}
+          aria-label="Search Steam games"
+        />
+        {q ? (
+          <button className="page-search-clear" type="button" onClick={() => updateSearch("")} aria-label="Clear search">
+            Clear
+          </button>
+        ) : isSearching || loading ? (
+          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#6c7e75]">…</span>
+        ) : null}
       </div>
 
       {trimmedQuery ? (
