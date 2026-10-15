@@ -57,7 +57,7 @@ function WatchListPage() {
       <div className="page-header" id="watchlist">
         <div>
           <h1 className="page-title">Watch List</h1>
-          <p className="page-subtitle">Games you saved — tap the bookmark on any deal to watch it here.</p>
+          <p className="page-subtitle">Games you saved — tap the bookmark on any deal to watch it here. Everything lives only on this device and never leaves it, so your list will not carry over to other devices.</p>
         </div>
         <div className="page-header-actions">
           <span className="badge-table success">

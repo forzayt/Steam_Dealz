@@ -1,6 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, AlertCircle, Bookmark, ExternalLink, Gamepad2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { getSteamDeals, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
 import { useWatchlist } from "@/lib/watchlist";
@@ -157,6 +158,14 @@ function portraitUrl(game: SteamDeal): string {
 export function WatchButton({ game, overlay }: { game: SteamDeal; overlay?: boolean }) {
   const { isWatched, toggle } = useWatchlist();
   const watched = isWatched(game.appId);
+  const handleClick = () => {
+    toggle(game);
+    if (watched) {
+      toast(`${game.title} removed from watch list`);
+    } else {
+      toast.success(`${game.title} added to watch list`);
+    }
+  };
   return (
     <button
       type="button"
@@ -164,7 +173,7 @@ export function WatchButton({ game, overlay }: { game: SteamDeal; overlay?: bool
       aria-pressed={watched}
       aria-label={watched ? `Remove ${game.title} from watch list` : `Add ${game.title} to watch list`}
       title={watched ? "Remove from watch list" : "Add to watch list"}
-      onClick={() => toggle(game)}
+      onClick={handleClick}
     >
       <Bookmark size={20} fill={watched ? "currentColor" : "none"} />
     </button>
