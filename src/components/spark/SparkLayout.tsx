@@ -48,9 +48,29 @@ export function SparkLayout({
   const [showProfile, setShowProfile] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hoverOpen, setHoverOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const createRef = useRef<HTMLDivElement>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSidebarEnter = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    if (minimized) setHoverOpen(true);
+  };
+
+  const handleSidebarLeave = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setHoverOpen(false), 120);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    };
+  }, []);
+
+  const collapsed = minimized && !hoverOpen;
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -86,6 +106,12 @@ export function SparkLayout({
     }
     if (href.startsWith("#")) {
       document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (href.startsWith("/#")) {
+      const id = href.slice(1);
+      if (window.location.pathname === "/") document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+      else window.location.href = href;
+    } else {
+      window.location.href = href;
     }
   };
 
@@ -95,6 +121,7 @@ export function SparkLayout({
         href={href}
         onClick={(e) => {
           if (href.startsWith("#")) e.preventDefault();
+          else if (onNav) e.preventDefault();
           go(key, href);
         }}
         className={`sidebar-menu-link${activeNav === key ? " active" : ""}`}
@@ -108,18 +135,22 @@ export function SparkLayout({
   );
 
   return (
-    <div className={`spark-shell${minimized ? " spark-minimized" : ""}`}>
+    <div className={`spark-shell${collapsed ? " spark-minimized" : ""}`}>
       <div className={`sidebar-overlay${mobileOpen ? " show" : ""}`} onClick={() => setMobileOpen(false)} />
 
-      {/* Sidebar */}
-      <aside className={`sidebar-wrapper${mobileOpen ? " show" : ""}`} id="sidebar">
+      {/* Sidebar — auto-expands on hover when minimized, collapses on mouse leave */}
+      <aside
+        className={`sidebar-wrapper${mobileOpen ? " show" : ""}`}
+        id="sidebar"
+        onMouseEnter={handleSidebarEnter}
+        onMouseLeave={handleSidebarLeave}
+      >
         <a
-          href="#top"
+          href="/"
           className="sidebar-brand"
           onClick={(e) => {
             e.preventDefault();
-            go("dashboard", "#top");
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            go("dashboard", "/");
           }}
         >
           <span className="sidebar-brand-mark sidebar-brand-mark--logo">
@@ -132,16 +163,16 @@ export function SparkLayout({
           <div className="sidebar-menu-section">
             <div className="sidebar-menu-title">Menu</div>
             <ul className="sidebar-menu-list">
-              {navItem("dashboard", "#top", <LayoutDashboard size={19} />, "Dashboard")}
+              {navItem("dashboard", "/", <LayoutDashboard size={19} />, "Dashboard")}
             </ul>
           </div>
 
           <div className="sidebar-menu-section">
             <div className="sidebar-menu-title">Store</div>
             <ul className="sidebar-menu-list">
-              {navItem("deals", "#deals", <Tags size={19} />, "Discounted Games")}
-              {navItem("free", "#free-offers", <Gift size={19} />, "Free Offers")}
-              {navItem("analytics", "#analytics", <BarChart3 size={19} />, "Analytics")}
+              {navItem("deals", "/deals", <Tags size={19} />, "Discounted Games")}
+              {navItem("free", "/free-offers", <Gift size={19} />, "Free Offers")}
+              {navItem("analytics", "/#analytics", <BarChart3 size={19} />, "Analytics")}
             </ul>
           </div>
 
@@ -227,7 +258,7 @@ export function SparkLayout({
                   >
                     <RefreshCw size={16} /> Refresh deals
                   </button>
-                  <a className="spark-pop-item" href="#deals" onClick={() => setShowCreate(false)}>
+                  <a className="spark-pop-item" href="/deals" onClick={() => setShowCreate(false)}>
                     <Tags size={16} /> Browse discounts
                   </a>
                   <a
@@ -305,7 +336,7 @@ export function SparkLayout({
                       ))
                     )}
                   </div>
-                  <a href="#deals" onClick={() => setShowNotif(false)} className="block px-4 py-3 text-center text-[0.8rem] font-bold text-[#072f1f]">
+                  <a href="/deals" onClick={() => setShowNotif(false)} className="block px-4 py-3 text-center text-[0.8rem] font-bold text-[#072f1f]">
                     View all deals
                   </a>
                 </div>
@@ -335,10 +366,10 @@ export function SparkLayout({
               {showProfile ? (
                 <div className="spark-pop" style={{ top: "calc(100% + 10px)", right: 0, width: 210 }}>
                   <div className="spark-pop-header">Welcome!</div>
-                  <a className="spark-pop-item" href="#analytics" onClick={() => setShowProfile(false)}>
+                  <a className="spark-pop-item" href="/#analytics" onClick={() => setShowProfile(false)}>
                     <BarChart3 size={16} /> Analytics
                   </a>
-                  <a className="spark-pop-item" href="#region" onClick={() => setShowProfile(false)}>
+                  <a className="spark-pop-item" href="/deals" onClick={() => setShowProfile(false)}>
                     <Settings size={16} /> Store region
                   </a>
                   <a
@@ -378,10 +409,10 @@ export function SparkLayout({
           </div>
           <div>
             <ul className="footer-links">
-              <li><a href="#top" className="footer-link">Overview</a></li>
-              <li><a href="#analytics" className="footer-link">Statistics</a></li>
-              <li><a href="#deals" className="footer-link">Help & Documentation</a></li>
-              <li><a href="#top" className="footer-link">Status <span className="status-dot" /></a></li>
+              <li><a href="/" className="footer-link">Overview</a></li>
+              <li><a href="/#analytics" className="footer-link">Statistics</a></li>
+              <li><a href="/deals" className="footer-link">Discounted Games</a></li>
+              <li><a href="/free-offers" className="footer-link">Free Offers <span className="status-dot" /></a></li>
             </ul>
           </div>
         </footer>
