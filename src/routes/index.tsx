@@ -17,7 +17,8 @@ import { useMemo, useState } from "react";
 import { SparkLayout } from "@/components/spark/SparkLayout";
 import { Donut, RevenueBars, Sparkline } from "@/components/spark/SparkCharts";
 import {
-  DealRow,
+  DealCard,
+  DealCardSkeleton,
   ProgressRow,
   REGION_NAMES,
   useDebouncedTerm,
@@ -269,19 +270,10 @@ function SteamDealsPage() {
                 <h2 className="card-title">Top Transactions</h2>
                 <span className="badge-table success">{paidDeals.length} paid</span>
               </div>
-              <div className="custom-list">
+              <div className="deal-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
                 {loading
-                  ? Array.from({ length: 4 }, (_, i) => (
-                      <div key={i} className="deal-row">
-                        <div className="deal-thumb spark-skeleton" />
-                        <div className="min-w-0 flex-1 space-y-2">
-                          <div className="spark-skeleton h-4 w-3/5" />
-                          <div className="spark-skeleton h-3 w-2/5" />
-                        </div>
-                        <div className="spark-skeleton h-8 w-16" />
-                      </div>
-                    ))
-                  : paidDeals.slice(0, 4).map((g) => <DealRow key={g.appId} game={g} />)}
+                  ? Array.from({ length: 4 }, (_, i) => <DealCardSkeleton key={i} />)
+                  : paidDeals.slice(0, 4).map((g) => <DealCard key={g.appId} game={g} />)}
               </div>
               {!loading && paidDeals.length === 0 ? (
                 <p className="mt-3 text-sm text-[#6c7e75]">No paid discounts loaded yet.</p>

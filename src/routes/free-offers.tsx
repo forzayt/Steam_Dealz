@@ -3,7 +3,7 @@ import { AlertCircle, CalendarDays, ChevronDown, Gift, RefreshCw, Search } from 
 import { useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
-import { DealRow, REGION_NAMES, useDebouncedTerm, useSteamDeals } from "@/components/spark/deals-shared";
+import { DealCard, DealCardSkeleton, REGION_NAMES, useDebouncedTerm, useSteamDeals } from "@/components/spark/deals-shared";
 import { STEAM_COUNTRIES, type SteamCountry } from "@/lib/steam-deals.functions";
 
 export const Route = createFileRoute("/free-offers")({
@@ -127,22 +127,15 @@ function FreeOffersPage() {
           </span>
         </div>
         {loading ? (
-          <div className="custom-list">
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="deal-row">
-                <div className="deal-thumb spark-skeleton" />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="spark-skeleton h-4 w-3/5" />
-                  <div className="spark-skeleton h-3 w-2/5" />
-                </div>
-                <div className="spark-skeleton h-8 w-20" />
-              </div>
+          <div className="deal-grid">
+            {Array.from({ length: 12 }, (_, i) => (
+              <DealCardSkeleton key={i} />
             ))}
           </div>
         ) : freeOffers.length ? (
-          <div className="custom-list">
+          <div className="deal-grid">
             {freeOffers.map((g) => (
-              <DealRow key={g.appId} game={g} />
+              <DealCard key={g.appId} game={g} />
             ))}
           </div>
         ) : (

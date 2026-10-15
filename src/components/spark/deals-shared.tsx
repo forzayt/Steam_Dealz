@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, AlertCircle, Gamepad2 } from "lucide-react";
+import { ArrowUpRight, AlertCircle, ExternalLink, Gamepad2, MoreHorizontal } from "lucide-react";
 
 import { getSteamDeals, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
 
@@ -145,6 +145,98 @@ export function DealRow({ game }: { game: SteamDeal }) {
       </div>
       <span className={`deal-price${game.isFree ? " free" : ""}`}>{game.currentPrice}</span>
     </article>
+  );
+}
+
+function portraitUrl(game: SteamDeal): string {
+  if (!game.appId) return game.coverUrl;
+  return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appId}/library_600x900.jpg`;
+}
+
+export function DealCard({ game }: { game: SteamDeal }) {
+  const portrait = portraitUrl(game);
+  const [src, setSrc] = useState(portrait);
+  useEffect(() => {
+    setSrc(portrait);
+  }, [portrait]);
+
+  return (
+    <article className="deal-card">
+      <a
+        href={game.storeUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="deal-card-media"
+        aria-label={`View ${game.title} on Steam`}
+      >
+        <img
+          src={src}
+          onError={() => {
+            if (src !== game.coverUrl) setSrc(game.coverUrl);
+          }}
+          alt={`${game.title} cover`}
+          loading="lazy"
+        />
+        {game.discountPercent > 0 ? <span className="deal-discount">-{game.discountPercent}%</span> : null}
+        {game.isFree ? <span className="deal-free">FREE</span> : null}
+      </a>
+      <div className="deal-card-body">
+        <div className="deal-card-top">
+          <h3 className="deal-card-title" title={game.title}>
+            <a href={game.storeUrl} target="_blank" rel="noreferrer">
+              {game.title}
+            </a>
+          </h3>
+          <a
+            href={game.storeUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="deal-card-more"
+            aria-label={`More options for ${game.title}`}
+            title="View on Steam"
+          >
+            <MoreHorizontal size={16} />
+          </a>
+        </div>
+        <p className="deal-card-meta">
+          {game.discountPercent > 0 ? (
+            <>
+              <s>{game.originalPrice}</s>
+              <span aria-hidden="true">·</span>
+              <span>Steam price</span>
+            </>
+          ) : (
+            "Steam price"
+          )}
+        </p>
+        <div className="deal-card-foot">
+          <span className={`deal-price${game.isFree ? " free" : ""}`}>{game.currentPrice}</span>
+          <a
+            href={game.storeUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="deal-card-open"
+            aria-label={`Open ${game.title} store page`}
+          >
+            <ExternalLink size={13} />
+            <span>Store</span>
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function DealCardSkeleton() {
+  return (
+    <div className="deal-card" aria-hidden="true">
+      <div className="deal-card-media spark-skeleton" />
+      <div className="deal-card-body">
+        <div className="spark-skeleton h-4 w-4/5" />
+        <div className="spark-skeleton h-3 w-3/5" />
+        <div className="spark-skeleton h-7 w-20" />
+      </div>
+    </div>
   );
 }
 
