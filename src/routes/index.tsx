@@ -45,7 +45,7 @@ function SteamDealsPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate({ from: "/" });
   const [country, setCountry] = useState<SteamCountry>("IN");
-  const { trimmedQuery, activeTerm, isSearching } = useDebouncedTerm(q);
+  const { trimmedQuery, activeTerm } = useDebouncedTerm(q);
   const { games, paidDeals, freeOffers, totalCount, loading, error, lastUpdated, refresh, hasMore } =
     useSteamDeals(country, activeTerm);
 
@@ -87,10 +87,6 @@ function SteamDealsPage() {
 
   const sparkA = useMemo(() => paidDeals.slice(0, 12).map((g) => g.discountPercent), [paidDeals]);
   const sparkB = useMemo(() => [...paidDeals].slice(0, 12).map((g) => 100 - g.discountPercent), [paidDeals]);
-
-  const updateSearch = (value: string) => {
-    void navigate({ search: (prev) => ({ ...prev, q: value }), replace: true });
-  };
 
   const updatedLabel = lastUpdated
     ? new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -159,27 +155,6 @@ function SteamDealsPage() {
             <span>Refresh</span>
           </button>
         </div>
-      </div>
-
-      <div className="page-search-wrapper">
-        <span className="page-search-icon" aria-hidden="true">
-          <Search size={17} />
-        </span>
-        <input
-          type="search"
-          className="page-search-input"
-          placeholder="Search Steam games — try “elden ring”"
-          value={q}
-          onChange={(e) => updateSearch(e.currentTarget.value)}
-          aria-label="Search Steam games"
-        />
-        {q ? (
-          <button className="page-search-clear" type="button" onClick={() => updateSearch("")} aria-label="Clear search">
-            Clear
-          </button>
-        ) : isSearching || loading ? (
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#6c7e75]">…</span>
-        ) : null}
       </div>
 
       {trimmedQuery ? (
