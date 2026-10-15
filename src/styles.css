@@ -339,11 +339,35 @@
   gap: 1.25rem;
 }
 .navbar-left { display: flex; align-items: center; gap: 0.7rem; }
-.sidebar-brand.navbar-brand {
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 800;
   color: var(--brand-forest-dark);
+  text-decoration: none;
   margin-bottom: 0;
   padding-left: 0;
-  font-size: 1.15rem;
+}
+.navbar-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(7, 47, 31, 0.14);
+  border-radius: 50rem;
+}
+.navbar-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50rem;
 }
 .btn-quick-action {
   background-color: var(--brand-forest-medium);

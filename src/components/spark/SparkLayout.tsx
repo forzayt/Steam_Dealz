@@ -220,13 +220,13 @@ export function SparkLayout({
             </button>
             <a
               href="/"
-              className="sidebar-brand navbar-brand"
+              className="navbar-brand"
               onClick={(e) => {
                 e.preventDefault();
                 go("dashboard", "/");
               }}
             >
-              <span className="sidebar-brand-mark sidebar-brand-mark--logo">
+              <span className="navbar-brand-mark">
                 <img src="/favicon-steam.png" alt="Steam Dealz logo" />
               </span>
               <span>Steam Dealz</span>
