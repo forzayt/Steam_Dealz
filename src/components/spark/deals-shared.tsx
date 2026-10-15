@@ -187,13 +187,16 @@ export function WatchButton({ game, overlay }: { game: SteamDeal; overlay?: bool
 export function DealCard({ game, rank }: { game: SteamDeal; rank?: number }) {
   const portrait = portraitUrl(game);
   const [src, setSrc] = useState(portrait);
+  const [landscape, setLandscape] = useState(false);
   useEffect(() => {
     setSrc(portrait);
+    setLandscape(false);
   }, [portrait]);
 
   return (
     <article className="deal-card">
       <div className="deal-card-media">
+        {landscape ? <img src={src} alt="" aria-hidden="true" className="media-blur" /> : null}
         <a
           href={game.storeUrl}
           target="_blank"
@@ -205,8 +208,13 @@ export function DealCard({ game, rank }: { game: SteamDeal; rank?: number }) {
             onError={() => {
               if (src !== game.coverUrl) setSrc(game.coverUrl);
             }}
+            onLoad={(e) => {
+              const el = e.currentTarget;
+              setLandscape(el.naturalWidth > el.naturalHeight);
+            }}
             alt={`${game.title} cover`}
             loading="lazy"
+            className={landscape ? "fit" : undefined}
           />
         </a>
         {game.discountPercent > 0 ? <span className="deal-discount">-{game.discountPercent}%</span> : null}
