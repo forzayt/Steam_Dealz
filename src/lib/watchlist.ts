@@ -29,6 +29,7 @@ function persist(items: SteamDeal[]) {
   } catch {
     /* storage full or unavailable — watchlist stays in memory */
   }
+  window.dispatchEvent(new Event("steam-dealz-watchlist-changed"));
 }
 
 export function useWatchlist() {
@@ -36,11 +37,16 @@ export function useWatchlist() {
 
   useEffect(() => {
     setItems(loadWatchlist());
+    const reload = () => setItems(loadWatchlist());
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setItems(loadWatchlist());
+      if (e.key === STORAGE_KEY) reload();
     };
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener("steam-dealz-watchlist-changed", reload);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("steam-dealz-watchlist-changed", reload);
+    };
   }, []);
 
   const isWatched = useCallback(
@@ -48,23 +54,25 @@ export function useWatchlist() {
     [items],
   );
 
-  const toggle = useCallback((game: SteamDeal) => {
-    setItems((current) => {
-      const next = current.some((g) => g.appId === game.appId)
-        ? current.filter((g) => g.appId !== game.appId)
-        : [...current, game];
+  const toggle = useCallback(
+    (game: SteamDeal) => {
+      const next = items.some((g) => g.appId === game.appId)
+        ? items.filter((g) => g.appId !== game.appId)
+        : [...items, game];
       persist(next);
-      return next;
-    });
-  }, []);
+      setItems(next);
+    },
+    [items],
+  );
 
-  const remove = useCallback((appId: string) => {
-    setItems((current) => {
-      const next = current.filter((g) => g.appId !== appId);
+  const remove = useCallback(
+    (appId: string) => {
+      const next = items.filter((g) => g.appId !== appId);
       persist(next);
-      return next;
-    });
-  }, []);
+      setItems(next);
+    },
+    [items],
+  );
 
   const clear = useCallback(() => {
     persist([]);
