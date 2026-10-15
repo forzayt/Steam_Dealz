@@ -30,4 +30,9 @@
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://steamdealzz.vercel.app/coming-soon</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>

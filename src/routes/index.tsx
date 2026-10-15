@@ -184,7 +184,7 @@ function SteamDealsPage() {
       document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog" | "/top-sellers", search: { q } });
+    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog" | "/top-sellers" | "/coming-soon", search: { q } });
   };
 
   const maxForBar = Math.max(games.length, 1);

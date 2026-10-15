@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChangelogRouteImport } from './routes/changelog'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as DealsRouteImport } from './routes/deals'
 import { Route as FreeOffersRouteImport } from './routes/free-offers'
 import { Route as TopSellersRouteImport } from './routes/top-sellers'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ChangelogRoute = ChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DealsRoute = DealsRouteImport.update({
@@ -50,6 +56,7 @@ const WatchListRoute = WatchListRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/changelog': typeof ChangelogRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
   '/top-sellers': typeof TopSellersRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/changelog': typeof ChangelogRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
   '/top-sellers': typeof TopSellersRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/changelog': typeof ChangelogRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
   '/top-sellers': typeof TopSellersRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/changelog'
+    | '/coming-soon'
     | '/deals'
     | '/free-offers'
     | '/top-sellers'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/changelog'
+    | '/coming-soon'
     | '/deals'
     | '/free-offers'
     | '/top-sellers'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/changelog'
+    | '/coming-soon'
     | '/deals'
     | '/free-offers'
     | '/top-sellers'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChangelogRoute: typeof ChangelogRoute
+  ComingSoonRoute: typeof ComingSoonRoute
   DealsRoute: typeof DealsRoute
   FreeOffersRoute: typeof FreeOffersRoute
   TopSellersRoute: typeof TopSellersRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/changelog'
       fullPath: '/changelog'
       preLoaderRoute: typeof ChangelogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/deals': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChangelogRoute: ChangelogRoute,
+  ComingSoonRoute: ComingSoonRoute,
   DealsRoute: DealsRoute,
   FreeOffersRoute: FreeOffersRoute,
   TopSellersRoute: TopSellersRoute,

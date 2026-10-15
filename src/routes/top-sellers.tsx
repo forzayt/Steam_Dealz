@@ -48,7 +48,7 @@ function TopSellersPage() {
       return;
     }
     void navigate({
-      to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog" | "/top-sellers",
+      to: href as "/" | "/deals" | "/free-offers" | "/watch-list" | "/changelog" | "/top-sellers" | "/coming-soon",
       search: { q },
     });
   };

@@ -553,6 +553,16 @@
 .alert-green-clickable:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 .alert-green-stretch { position: absolute; inset: 0; z-index: 3; }
 .sale-ticker-art { position: absolute; inset: 0; animation: artIn 0.6s ease; }
+.release-date-heading {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.8rem;
+}
+.release-date-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.6rem; height: 1.6rem; padding: 0 0.45rem; border-radius: 50rem;
+  background: var(--brand-lime); color: var(--brand-forest-dark);
+  font-size: 0.72rem; font-weight: 850;
+}
 .alert-green-link { color: var(--brand-lime); font-size: 0.86rem; font-weight: 650; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: auto; background: none; border: 0; cursor: pointer; padding: 0; text-decoration: none; }
 .alert-green-link:hover { color: #fff; }
 .alert-green-bg-shape { position: absolute; bottom: -24px; right: -24px; width: 132px; height: 132px; opacity: 0.95; pointer-events: none; }

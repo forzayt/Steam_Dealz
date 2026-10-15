@@ -14,6 +14,8 @@ export type SteamDeal = {
   currentPrice: string;
   currentPriceAmount: number;
   isFree: boolean;
+  /** Release window text from Steam search (coming-soon listing). */
+  releaseDate?: string;
 };
 
 export type SteamEvent = {
@@ -80,7 +82,7 @@ function numericPrice(value: string): number {
   return Number(`${integer || "0"}.${fraction}`);
 }
 
-function parseDeals(html: string, requireDiscount = true): SteamDeal[] {
+function parseDeals(html: string, requireDiscount = true, allowMissingPrice = false): SteamDeal[] {
   const rows = html.match(
     /<a\b(?=[^>]*class="[^"]*\bsearch_result_row\b)[^>]*>[\s\S]*?<\/a>/gi,
   ) ?? [];
@@ -90,10 +92,13 @@ function parseDeals(html: string, requireDiscount = true): SteamDeal[] {
     const title = elementText(row, "title");
     const discountPercent = Number(row.match(/data-discount="(\d+)"/i)?.[1] ?? 0);
     const originalRaw = elementText(row, "discount_original_price");
-    const currentPrice = elementText(row, "discount_final_price");
+    const currentRaw = elementText(row, "discount_final_price");
+    const isFreeText = /^\s*free\s*$/i.test(currentRaw);
+    const currentPrice = currentRaw || (allowMissingPrice ? "TBA" : "");
     const originalPrice = originalRaw || currentPrice;
     const originalAmount = numericPrice(originalPrice);
-    const currentPriceAmount = numericPrice(currentPrice);
+    const currentPriceAmount = isFreeText ? 0 : currentRaw ? numericPrice(currentRaw) : Number.POSITIVE_INFINITY;
+    const releaseDate = elementText(row, "search_released");
     const image = row.match(/<img\b[^>]*\bsrc="([^"]+)"/i)?.[1];
 
     if (
@@ -102,8 +107,7 @@ function parseDeals(html: string, requireDiscount = true): SteamDeal[] {
       !image ||
       !image.startsWith("https://") ||
       !image.includes("steamstatic.com") ||
-      !Number.isFinite(originalAmount) ||
-      !Number.isFinite(currentPriceAmount)
+      (!allowMissingPrice && (!Number.isFinite(originalAmount) || !Number.isFinite(currentPriceAmount)))
     ) {
       return [];
     }
@@ -124,6 +128,7 @@ function parseDeals(html: string, requireDiscount = true): SteamDeal[] {
       currentPrice,
       currentPriceAmount,
       isFree: currentPriceAmount === 0,
+      releaseDate: releaseDate || undefined,
     }];
   });
 }
@@ -132,17 +137,18 @@ async function getSteamPage(
   country: SteamCountry,
   start: number,
   term = "",
-  listing: "specials" | "topsellers" = "specials",
+  listing: "specials" | "topsellers" | "comingsoon" = "specials",
 ) {
   const termKey = term.trim().toLocaleLowerCase().slice(0, 100);
   const key = `${country}:${listing}:${termKey}:${start}`;
   const cached = pageCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached;
 
+  const sortBy = termKey ? "_ASC" : listing === "comingsoon" ? "Released_ASC" : listing === "topsellers" ? "_ASC" : "Price_ASC";
   const params = new URLSearchParams({
     start: String(start),
     count: String(PAGE_SIZE),
-    sort_by: termKey ? "_ASC" : listing === "topsellers" ? "_ASC" : "Price_ASC",
+    sort_by: sortBy,
     cc: country,
     l: "english",
     supportedlang: "english",
@@ -152,6 +158,9 @@ async function getSteamPage(
   });
   if (termKey) {
     params.set("term", term.trim().slice(0, 100));
+  } else if (listing === "comingsoon") {
+    params.set("query", "");
+    params.set("filter", "comingsoon");
   } else if (listing === "topsellers") {
     params.set("query", "");
     params.set("filter", "topsellers");
@@ -174,7 +183,7 @@ async function getSteamPage(
 
   const value = {
     expiresAt: Date.now() + CACHE_TTL_MS,
-    deals: parseDeals(data.results_html, !termKey && listing === "specials"),
+    deals: parseDeals(data.results_html, !termKey && listing === "specials", listing === "comingsoon"),
     totalCount: Number.isFinite(data.total_count) ? Number(data.total_count) : 0,
   };
   if (pageCache.size >= 36) {
@@ -190,7 +199,7 @@ const inputSchema = z.object({
   start: z.number().int().min(0).max(10_000).multipleOf(PAGE_SIZE),
   refresh: z.boolean().optional(),
   term: z.string().trim().max(100).optional().default(""),
-  listing: z.enum(["specials", "topsellers"]).optional().default("specials"),
+  listing: z.enum(["specials", "topsellers", "comingsoon"]).optional().default("specials"),
 });
 
 export const getSteamDeals = createServerFn({ method: "GET" })

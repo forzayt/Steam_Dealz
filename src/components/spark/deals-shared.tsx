@@ -21,7 +21,7 @@ export const REGION_NAMES: Record<SteamCountry, string> = {
 export function useSteamDeals(
   country: SteamCountry,
   activeTerm: string,
-  listing: "specials" | "topsellers" = "specials",
+  listing: "specials" | "topsellers" | "comingsoon" = "specials",
 ) {
   const fetchSteamDeals = useServerFn(getSteamDeals);
   const [games, setGames] = useState<SteamDeal[]>([]);
