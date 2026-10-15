@@ -246,20 +246,21 @@ function SteamDealsPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-label="Loading game deals" aria-busy="true">
+          <div className="flex flex-col gap-2" aria-label="Loading game deals" aria-busy="true">
             {Array.from({ length: 8 }, (_, index) => (
-              <div key={index} className="steam-game-card" aria-hidden="true">
-                <div className="steam-cover steam-skeleton" />
-                <div className="space-y-3 p-4">
-                  <div className="steam-skeleton h-4 w-4/5 rounded-sm" />
+              <div key={index} className="steam-game-bar" aria-hidden="true">
+                <div className="steam-bar-thumb steam-skeleton" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="steam-skeleton h-4 w-3/5 rounded-sm" />
                   <div className="steam-skeleton h-3 w-2/5 rounded-sm" />
                 </div>
+                <div className="steam-skeleton h-8 w-20 shrink-0 rounded-sm" />
               </div>
             ))}
           </div>
         ) : paidDeals.length > 0 || freeOffers.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {[...paidDeals, ...freeOffers].map((game) => <GameCard key={game.appId} game={game} />)}
+          <div className="flex flex-col gap-2">
+            {[...paidDeals, ...freeOffers].map((game) => <GameBar key={game.appId} game={game} />)}
           </div>
         ) : (
           <EmptyState searching={Boolean(activeTerm)} hasError={Boolean(error)} term={activeTerm} />
@@ -280,8 +281,8 @@ function SteamDealsPage() {
               <h2 id="free-offers-heading" className="text-lg font-bold">Free offers</h2>
               <p className="mt-1 text-xs text-muted-foreground">100% discounts are listed separately from paid deals.</p>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {freeOffers.map((game) => <GameCard key={game.appId} game={game} />)}
+            <div className="flex flex-col gap-2">
+              {freeOffers.map((game) => <GameBar key={game.appId} game={game} />)}
             </div>
           </section>
         )}
@@ -297,30 +298,45 @@ function SteamDealsPage() {
   );
 }
 
-function GameCard({ game }: { game: SteamDeal }) {
+function GameBar({ game }: { game: SteamDeal }) {
   const hasDiscount = game.discountPercent > 0;
   return (
-    <article className="steam-game-card flex min-w-0 flex-col">
-      <a href={game.storeUrl} target="_blank" rel="noreferrer" className="group block" aria-label={`View ${game.title} on the Steam Store`}>
-        <div className="steam-cover">
-          <img src={game.coverUrl} alt={`${game.title} cover`} loading="lazy" />
-          {hasDiscount && <span className="steam-discount-tag">-{game.discountPercent}%</span>}
-        </div>
+    <article className="steam-game-bar">
+      <a
+        href={game.storeUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="steam-bar-thumb block shrink-0"
+        aria-label={`View ${game.title} on the Steam Store`}
+      >
+        <img src={game.coverUrl} alt={`${game.title} cover`} loading="lazy" />
+        {hasDiscount && <span className="steam-discount-tag">-{game.discountPercent}%</span>}
       </a>
-      <div className="flex min-h-32 flex-1 flex-col justify-between gap-4 p-4">
-        <a href={game.storeUrl} target="_blank" rel="noreferrer" className="flex items-start justify-between gap-2 text-sm font-semibold leading-5 text-card-foreground transition-colors hover:text-steam-highlight">
-          <span className="line-clamp-2">{game.title}</span>
-          <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
+        <a
+          href={game.storeUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 text-sm font-semibold leading-5 text-card-foreground transition-colors hover:text-steam-highlight"
+        >
+          <span className="truncate">{game.title}</span>
+          <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </a>
-        <div className="flex items-end justify-between gap-3">
+        <p className="mt-1 text-xs text-muted-foreground">
           {hasDiscount ? (
-            <span className="text-xs text-steam-price-old line-through">{game.originalPrice}</span>
+            <>
+              <span className="text-steam-price-old line-through">{game.originalPrice}</span>
+              <span className="mx-1.5" aria-hidden="true">·</span>
+              <span>Steam price</span>
+            </>
           ) : (
-            <span className="text-xs text-muted-foreground">Steam price</span>
+            "Steam price"
           )}
-          <span className="whitespace-nowrap rounded-sm bg-steam-deal/15 px-2.5 py-1.5 text-sm font-bold text-steam-deal">{game.currentPrice}</span>
-        </div>
+        </p>
       </div>
+      <span className="shrink-0 whitespace-nowrap rounded-sm bg-steam-deal/15 px-2.5 py-1.5 text-sm font-bold text-steam-deal">
+        {game.currentPrice}
+      </span>
     </article>
   );
 }
