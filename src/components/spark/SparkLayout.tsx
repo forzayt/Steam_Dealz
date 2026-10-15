@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   BarChart3,
+  Bookmark,
   ChevronDown,
   ExternalLink,
   Gift,
@@ -17,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 
-export type SparkNavKey = "dashboard" | "deals" | "free" | "analytics";
+export type SparkNavKey = "dashboard" | "deals" | "free" | "watchlist" | "analytics";
 
 export function SparkLayout({
   children,
@@ -173,7 +174,7 @@ export function SparkLayout({
             <ul className="sidebar-menu-list">
               {navItem("deals", "/deals", <Tags size={19} />, "Discounted Games")}
               {navItem("free", "/free-offers", <Gift size={19} />, "Free Offers")}
-              {navItem("analytics", "/#analytics", <BarChart3 size={19} />, "Analytics")}
+              {navItem("watchlist", "/watch-list", <Bookmark size={19} />, "Watch List")}
             </ul>
           </div>
 

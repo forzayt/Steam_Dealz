@@ -648,6 +648,22 @@
   text-decoration: none;
 }
 .deal-card-more:hover { background: var(--background); color: var(--text-main); }
+.deal-card-watch {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted-green);
+  cursor: pointer;
+}
+.deal-card-watch:hover { background: var(--background); color: var(--text-main); }
+.deal-card-watch.active { color: var(--brand-forest-medium); }
+.dark .deal-card-watch.active { color: var(--brand-lime); }
 .deal-card-meta {
   margin: 0;
   font-size: 0.74rem;

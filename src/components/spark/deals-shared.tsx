@@ -1,8 +1,9 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, AlertCircle, ExternalLink, Gamepad2, MoreHorizontal } from "lucide-react";
+import { ArrowUpRight, AlertCircle, Bookmark, ExternalLink, Gamepad2, MoreHorizontal } from "lucide-react";
 
 import { getSteamDeals, type SteamCountry, type SteamDeal } from "@/lib/steam-deals.functions";
+import { useWatchlist } from "@/lib/watchlist";
 
 export const REGION_NAMES: Record<SteamCountry, string> = {
   IN: "India · INR",
@@ -153,6 +154,23 @@ function portraitUrl(game: SteamDeal): string {
   return `https://cdn.akamai.steamstatic.com/steam/apps/${game.appId}/library_600x900.jpg`;
 }
 
+export function WatchButton({ game }: { game: SteamDeal }) {
+  const { isWatched, toggle } = useWatchlist();
+  const watched = isWatched(game.appId);
+  return (
+    <button
+      type="button"
+      className={`deal-card-watch${watched ? " active" : ""}`}
+      aria-pressed={watched}
+      aria-label={watched ? `Remove ${game.title} from watch list` : `Add ${game.title} to watch list`}
+      title={watched ? "Remove from watch list" : "Add to watch list"}
+      onClick={() => toggle(game)}
+    >
+      <Bookmark size={15} fill={watched ? "currentColor" : "none"} />
+    </button>
+  );
+}
+
 export function DealCard({ game }: { game: SteamDeal }) {
   const portrait = portraitUrl(game);
   const [src, setSrc] = useState(portrait);
@@ -187,16 +205,19 @@ export function DealCard({ game }: { game: SteamDeal }) {
               {game.title}
             </a>
           </h3>
-          <a
-            href={game.storeUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="deal-card-more"
-            aria-label={`More options for ${game.title}`}
-            title="View on Steam"
-          >
-            <MoreHorizontal size={16} />
-          </a>
+          <div className="flex flex-none items-center gap-0.5">
+            <WatchButton game={game} />
+            <a
+              href={game.storeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="deal-card-more"
+              aria-label={`More options for ${game.title}`}
+              title="View on Steam"
+            >
+              <MoreHorizontal size={16} />
+            </a>
+          </div>
         </div>
         <p className="deal-card-meta">
           {game.discountPercent > 0 ? (

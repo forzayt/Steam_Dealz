@@ -105,7 +105,7 @@ function SteamDealsPage() {
       document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    void navigate({ to: href as "/" | "/deals" | "/free-offers", search: { q } });
+    void navigate({ to: href as "/" | "/deals" | "/free-offers" | "/watch-list", search: { q } });
   };
 
   const maxForBar = Math.max(games.length, 1);

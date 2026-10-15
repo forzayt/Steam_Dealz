@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DealsRouteImport } from './routes/deals'
 import { Route as FreeOffersRouteImport } from './routes/free-offers'
+import { Route as WatchListRouteImport } from './routes/watch-list'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const FreeOffersRoute = FreeOffersRouteImport.update({
   path: '/free-offers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WatchListRoute = WatchListRouteImport.update({
+  id: '/watch-list',
+  path: '/watch-list',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
+  '/watch-list': typeof WatchListRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
+  '/watch-list': typeof WatchListRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/deals': typeof DealsRoute
   '/free-offers': typeof FreeOffersRoute
+  '/watch-list': typeof WatchListRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/deals' | '/free-offers'
+  fullPaths: '/' | '/deals' | '/free-offers' | '/watch-list'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/deals' | '/free-offers'
-  id: '__root__' | '/' | '/deals' | '/free-offers'
+  to: '/' | '/deals' | '/free-offers' | '/watch-list'
+  id: '__root__' | '/' | '/deals' | '/free-offers' | '/watch-list'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DealsRoute: typeof DealsRoute
   FreeOffersRoute: typeof FreeOffersRoute
+  WatchListRoute: typeof WatchListRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FreeOffersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/watch-list': {
+      id: '/watch-list'
+      path: '/watch-list'
+      fullPath: '/watch-list'
+      preLoaderRoute: typeof WatchListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DealsRoute: DealsRoute,
   FreeOffersRoute: FreeOffersRoute,
+  WatchListRoute: WatchListRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
