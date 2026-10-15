@@ -82,6 +82,7 @@ const SALE_EVENTS = [
     url: "https://store.steampowered.com/specials/",
     blurb: "Cooking, farming and food games on sale across Steam.",
     gradient: "linear-gradient(135deg, #f97316, #7c2d12)",
+    image: "https://clan.fastly.steamstatic.com/images/27766192/1a3c28cdfe990eafd2f8fe7432a956c8d5cf01a9.jpg",
   },
   {
     name: "Steam Next Fest: October 2026",
@@ -330,7 +331,13 @@ function SteamDealsPage() {
         <div className="flex min-w-0 flex-col gap-6">
           <div className={`card alert-green-card mb-0${sale ? " alert-green-clickable" : ""}`} id="events">
             <div className="alert-green-art" aria-hidden="true">
-              {sale ? <div key={`${sale.name}-${saleIdx}`} className="sale-ticker-art" style={{ background: sale.gradient }} /> : null}
+              {sale ? (
+                sale.image ? (
+                  <img key={`${sale.name}-${saleIdx}`} src={sale.image} alt="" aria-hidden="true" loading="lazy" />
+                ) : (
+                  <div key={`${sale.name}-${saleIdx}`} className="sale-ticker-art" style={{ background: sale.gradient }} />
+                )
+              ) : null}
             </div>
             <div className="alert-green-shade" aria-hidden="true" />
             <div className="relative z-[2]">
