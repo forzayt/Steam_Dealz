@@ -13,8 +13,12 @@ export const Route = createFileRoute("/deals")({
   head: () => ({
     meta: [
       { title: "Discounted Games — Steam Dealz" },
-      { name: "description", content: "All live discounted games from the official Steam Store, lowest price first." },
+      { name: "description", content: "All live discounted games from the official Steam Store, lowest regional price first." },
+      { property: "og:url", content: "https://steamdealzz.vercel.app/deals" },
+      { property: "og:title", content: "Discounted Games — Steam Dealz" },
+      { property: "og:description", content: "All live discounted games from the official Steam Store, lowest regional price first." },
     ],
+    links: [{ rel: "canonical", href: "https://steamdealzz.vercel.app/deals" }],
   }),
   component: DealsPage,
 });

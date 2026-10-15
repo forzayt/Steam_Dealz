@@ -1,7 +1,29 @@
+# Steam Dealz — all crawlers welcome, including search engines and AI bots.
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
 Allow: /
 
 User-agent: Twitterbot
@@ -12,3 +34,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://steamdealzz.vercel.app/sitemap.xml

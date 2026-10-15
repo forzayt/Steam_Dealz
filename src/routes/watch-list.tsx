@@ -14,7 +14,11 @@ export const Route = createFileRoute("/watch-list")({
     meta: [
       { title: "Watch List — Steam Dealz" },
       { name: "description", content: "Games you saved to watch for price drops on the official Steam Store." },
+      { property: "og:url", content: "https://steamdealzz.vercel.app/watch-list" },
+      { property: "og:title", content: "Watch List — Steam Dealz" },
+      { property: "og:description", content: "Games you saved to watch for price drops on the official Steam Store." },
     ],
+    links: [{ rel: "canonical", href: "https://steamdealzz.vercel.app/watch-list" }],
   }),
   component: WatchListPage,
 });

@@ -84,13 +84,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Steam Deals" },
-      { name: "description", content: "Live discounts from the official Steam Store, sorted by regional price." },
-      { name: "author", content: "Steam Deals" },
-      { property: "og:title", content: "Steam Deals" },
-      { property: "og:description", content: "Find current Steam Store discounts at real regional prices." },
+      { title: "Steam Dealz — Live Steam Discounts, Regional Prices & Free Offers" },
+      {
+        name: "description",
+        content:
+          "Steam Dealz tracks live discounts from the official Steam Store — lowest regional prices first, deep cuts up to 90% off, free offers, and a personal watch list.",
+      },
+      { name: "keywords", content: "steam deals, steam discounts, steam sales, cheap steam games, steam free games, steam price tracker, pc game deals" },
+      { name: "author", content: "Steam Dealz" },
+      { name: "robots", content: "index, follow" },
+      { name: "application-name", content: "Steam Dealz" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { property: "og:site_name", content: "Steam Dealz" },
+      { property: "og:title", content: "Steam Dealz — Live Steam Discounts & Regional Prices" },
+      { property: "og:description", content: "Live Steam Store discounts at real regional prices — deep cuts, free offers, and a personal watch list." },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "en_US" },
+      { property: "og:image", content: "https://steamdealzz.vercel.app/favicon-steam-512.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Steam Dealz — Live Steam Discounts & Regional Prices" },
+      {
+        name: "twitter:description",
+        content: "Live Steam Store discounts at real regional prices — deep cuts, free offers, and a personal watch list.",
+      },
+      { name: "twitter:image", content: "https://steamdealzz.vercel.app/favicon-steam-512.png" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "theme-color", content: "#051c12" },
     ],
@@ -121,6 +140,24 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Steam Dealz",
+              url: "https://steamdealzz.vercel.app/",
+              description:
+                "Live discounts from the official Steam Store — lowest regional prices first, free offers, and a personal watch list.",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: "https://steamdealzz.vercel.app/deals?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
       </head>
       <body>
         {children}

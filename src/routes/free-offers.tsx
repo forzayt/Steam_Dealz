@@ -14,7 +14,11 @@ export const Route = createFileRoute("/free-offers")({
     meta: [
       { title: "Free Offers — Steam Dealz" },
       { name: "description", content: "Free 100% Steam Store promotions, listed separately from paid deals." },
+      { property: "og:url", content: "https://steamdealzz.vercel.app/free-offers" },
+      { property: "og:title", content: "Free Offers — Steam Dealz" },
+      { property: "og:description", content: "Free 100% Steam Store promotions, listed separately from paid deals." },
     ],
+    links: [{ rel: "canonical", href: "https://steamdealzz.vercel.app/free-offers" }],
   }),
   component: FreeOffersPage,
 });
