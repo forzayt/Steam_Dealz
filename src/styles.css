@@ -339,6 +339,12 @@
   gap: 1.25rem;
 }
 .navbar-left { display: flex; align-items: center; gap: 0.7rem; }
+.sidebar-brand.navbar-brand {
+  color: var(--brand-forest-dark);
+  margin-bottom: 0;
+  padding-left: 0;
+  font-size: 1.15rem;
+}
 .btn-quick-action {
   background-color: var(--brand-forest-medium);
   color: #fff;

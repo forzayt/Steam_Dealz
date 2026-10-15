@@ -218,6 +218,19 @@ export function SparkLayout({
             <button className="sidebar-toggle-btn" onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle navigation" type="button">
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
+            <a
+              href="/"
+              className="sidebar-brand navbar-brand"
+              onClick={(e) => {
+                e.preventDefault();
+                go("dashboard", "/");
+              }}
+            >
+              <span className="sidebar-brand-mark sidebar-brand-mark--logo">
+                <img src="/favicon-steam.png" alt="Steam Dealz logo" />
+              </span>
+              <span>Steam Dealz</span>
+            </a>
           </div>
 
           <div className="navbar-actions">
