@@ -87,6 +87,27 @@ function DealsPage() {
         </div>
       </div>
 
+      <div className="page-search-wrapper">
+        <span className="page-search-icon" aria-hidden="true">
+          <Search size={17} />
+        </span>
+        <input
+          type="search"
+          className="page-search-input"
+          placeholder="Search Steam games — try “elden ring”"
+          value={q}
+          onChange={(e) => updateSearch(e.currentTarget.value)}
+          aria-label="Search Steam games"
+        />
+        {q ? (
+          <button className="page-search-clear" type="button" onClick={() => updateSearch("")} aria-label="Clear search">
+            Clear
+          </button>
+        ) : isSearching || loading ? (
+          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#6c7e75]">…</span>
+        ) : null}
+      </div>
+
       {trimmedQuery ? (
         <p className="mb-4 text-xs font-semibold text-[#6c7e75]" aria-live="polite">
           {totalCount > 0
