@@ -146,6 +146,13 @@ function SteamDealsPage() {
       .filter((s) => s.live || s.upcoming)
       .sort((a, b) => Number(b.live) - Number(a.live) || a.start.localeCompare(b.start));
   }, []);
+  const [saleIdx, setSaleIdx] = useState(0);
+  useEffect(() => {
+    if (saleEvents.length < 2) return;
+    const t = setInterval(() => setSaleIdx((i) => (i + 1) % saleEvents.length), 3500);
+    return () => clearInterval(t);
+  }, [saleEvents.length]);
+  const sale = saleEvents.length ? saleEvents[saleIdx % saleEvents.length] : undefined;
 
   const [freeIdx, setFreeIdx] = useState(0);
   useEffect(() => {
@@ -321,45 +328,44 @@ function SteamDealsPage() {
       {/* Main grid — dashboard only, full lists live on /deals and /free-offers */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
         <div className="flex min-w-0 flex-col gap-6">
-          <div className="card mb-0" id="events">
-            <div className="card-header mb-2">
-              <h2 className="card-title">Steam Sale Events</h2>
-              <span className="trend-badge trend-up text-xs">
-                {saleEvents.some((s) => s.live) ? "sale live now" : "upcoming"}
-              </span>
+          <div className={`card alert-green-card mb-0${sale ? " alert-green-clickable" : ""}`} id="events">
+            <div className="alert-green-art" aria-hidden="true">
+              {sale ? <div key={`${sale.name}-${saleIdx}`} className="sale-ticker-art" style={{ background: sale.gradient }} /> : null}
             </div>
-            {saleEvents.length ? (
-              <div className="sale-grid">
-                {saleEvents.map((s) => (
-                  <a key={s.name} href={s.url} target="_blank" rel="noreferrer" className="sale-tile">
-                    <span className="sale-banner" style={{ background: s.gradient }}>
-                      {s.live ? <span className="sale-live">Live</span> : null}
-                      <span className="sale-banner-name">{s.short}</span>
-                      <span className="sale-banner-dates">{saleRange(s.start, s.end)}</span>
-                    </span>
-                    <span className="sale-title">{s.name}</span>
-                    <span className="sale-desc">{s.blurb}</span>
-                  </a>
-                ))}
+            <div className="alert-green-shade" aria-hidden="true" />
+            <div className="relative z-[2]">
+              <span className="alert-green-badge">{sale?.live ? "Live Sale" : "Sale Events"}</span>
+              <div className="alert-green-date">
+                {REGION_NAMES[country]}
+                {saleEvents.length > 1 ? ` · ${Math.min(saleIdx + 1, saleEvents.length)} / ${saleEvents.length}` : null}
               </div>
+              {sale ? (
+                <div key={`${sale.name}-${saleIdx}`} className="alert-green-text alert-green-ticker">
+                  {sale.name} — {saleRange(sale.start, sale.end)}
+                </div>
+              ) : (
+                <div className="alert-green-text">No Steam sales on the calendar</div>
+              )}
+            </div>
+            {sale ? (
+              <span key={`sale-link-${sale.name}-${saleIdx}`} className="alert-green-link z-[2]">
+                <span>{sale.live ? `Live now · ends ${saleRange(sale.start, sale.end).split("–")[1]?.trim()}` : "View sale"}</span>
+                <ArrowRight size={15} />
+              </span>
             ) : (
-              <p className="text-sm font-semibold text-[#6c7e75]">
-                No dated sales on the calendar — fresh Steam dates land here as Valve announces them.
-              </p>
+              <span className="alert-green-link z-[2]">
+                <span>Fresh dates land here as Valve announces them</span>
+              </span>
             )}
-            <div className="sale-foot">
-              <a href="/deals" className="alert-green-link" style={{ color: "#072f1f" }}>
-                <span>Browse all deals</span> <ArrowRight size={15} />
-              </a>
+            {sale ? (
               <a
-                href="https://store.steampowered.com/specials/"
+                href={sale.url}
                 target="_blank"
                 rel="noreferrer"
-                className="sale-all"
-              >
-                View all sale events…
-              </a>
-            </div>
+                className="alert-green-stretch"
+                aria-label={`View Steam sale: ${sale.name}`}
+              />
+            ) : null}
           </div>
 
           <div className="card mb-0">
