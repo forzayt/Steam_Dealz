@@ -10,7 +10,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { SparkLayout } from "@/components/spark/SparkLayout";
 import { Donut, RevenueBars, Sparkline } from "@/components/spark/SparkCharts";
@@ -91,6 +91,17 @@ function SteamDealsPage() {
 
   const sparkA = useMemo(() => paidDeals.slice(0, 12).map((g) => g.discountPercent), [paidDeals]);
   const sparkB = useMemo(() => [...paidDeals].slice(0, 12).map((g) => 100 - g.discountPercent), [paidDeals]);
+
+  const [freeIdx, setFreeIdx] = useState(0);
+  useEffect(() => {
+    setFreeIdx(0);
+  }, [country, activeTerm]);
+  useEffect(() => {
+    if (freeOffers.length < 2) return;
+    const t = setInterval(() => setFreeIdx((i) => (i + 1) % freeOffers.length), 3500);
+    return () => clearInterval(t);
+  }, [freeOffers.length]);
+  const freeGame = freeOffers.length ? freeOffers[freeIdx % freeOffers.length] : undefined;
 
   const notifItems = [...paidDeals]
     .sort((a, b) => b.discountPercent - a.discountPercent)
@@ -174,21 +185,41 @@ function SteamDealsPage() {
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="card alert-green-card">
           <div className="relative z-[2]">
-            <span className="alert-green-badge">Top deal</span>
-            <div className="alert-green-date">{REGION_NAMES[country]}</div>
-            <div className="alert-green-text">
-              {stats.maxDeal ? `${stats.maxDeal.title} — ${stats.maxDeal.discountPercent}% off` : "Scanning Steam specials…"}
+            <span className="alert-green-badge">Free now</span>
+            <div className="alert-green-date">
+              {REGION_NAMES[country]}
+              {freeOffers.length > 1 ? ` · ${Math.min(freeIdx + 1, freeOffers.length)} / ${freeOffers.length}` : null}
             </div>
+            {loading ? (
+              <div className="alert-green-text">Scanning Steam specials…</div>
+            ) : freeGame ? (
+              <div key={`${freeGame.appId}-${freeIdx}`} className="alert-green-text alert-green-ticker">
+                {freeGame.title} — 100% off
+              </div>
+            ) : (
+              <div className="alert-green-text">No free offers right now</div>
+            )}
           </div>
-          {stats.maxDeal ? (
-            <a href={stats.maxDeal.storeUrl} target="_blank" rel="noreferrer" className="alert-green-link z-[2]">
-              <span>View on Steam · {stats.maxDeal.currentPrice}</span>
-              <ArrowRight size={15} />
-            </a>
-          ) : (
+          {loading ? (
             <span className="alert-green-link z-[2]">
               <span>Loading live prices…</span>
             </span>
+          ) : freeGame ? (
+            <a
+              key={`link-${freeGame.appId}-${freeIdx}`}
+              href={freeGame.storeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="alert-green-link z-[2]"
+            >
+              <span>Claim free · {freeGame.currentPrice}</span>
+              <ArrowRight size={15} />
+            </a>
+          ) : (
+            <a href="/free-offers" className="alert-green-link z-[2]">
+              <span>Check free offers</span>
+              <ArrowRight size={15} />
+            </a>
           )}
           <svg className="alert-green-bg-shape" viewBox="0 0 100 100" fill="none" aria-hidden="true">
             <g transform="translate(50,50)">

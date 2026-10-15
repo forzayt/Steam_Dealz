@@ -535,6 +535,8 @@
 .alert-green-badge::before { content: ''; width: 6px; height: 6px; background: var(--sys-red); border-radius: 50rem; display: inline-block; }
 .alert-green-date { font-size: 0.75rem; color: #9db3a8; margin-bottom: 0.3rem; }
 .alert-green-text { font-size: 1.12rem; font-weight: 750; line-height: 1.35; margin-bottom: 1rem; }
+.alert-green-ticker { animation: tickerIn 0.45s ease; }
+@keyframes tickerIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .alert-green-link { color: var(--brand-lime); font-size: 0.86rem; font-weight: 650; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: auto; background: none; border: 0; cursor: pointer; padding: 0; text-decoration: none; }
 .alert-green-link:hover { color: #fff; }
 .alert-green-bg-shape { position: absolute; bottom: -24px; right: -24px; width: 132px; height: 132px; opacity: 0.95; pointer-events: none; }
